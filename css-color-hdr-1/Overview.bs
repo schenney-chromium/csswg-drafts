@@ -3,9 +3,8 @@
 Title: CSS Color HDR Module Level 1
 Shortname: css-color-hdr
 Level: 1
-Status: FPWD
-Date: 2024-12-17
-Prepare for TR: yes
+Status: ED
+Prepare for TR: no
 Group: csswg
 TR: https://www.w3.org/TR/css-color-hdr-1/
 ED: https://drafts.csswg.org/css-color-hdr-1/
@@ -39,37 +38,55 @@ WPT Display: open
 			"href": "https://www.arib.or.jp/english/html/overview/doc/2-STD-B67v1_0.pdf",
 			"title": "Essential Parameter Values for the Extended Image Dynamic Range Television (EIDRTV) System for Programme Production",
 			"publisher": "ARIB",
-			"rawDate": "2015-07-03"
+			"ate": "3 July 2015"
 		},
 		"DisplayHDR": {
 			"title": "Summary of DisplayHDR Specs under CTS 1.2",
 			"href": "https://displayhdr.org/performance-criteria/",
 			"publisher": "VESA",
-			"rawDate": "2024-05-17"
+			"date": "17 May 2024"
+		},
+		"Perrin": {
+			"authors": [
+				"Perrin, A-F.",
+				"Rerabek, M.",
+				"Husak, W.",
+				"Ebrahimi, T."
+				],
+			"href": "https://ieeexplore.ieee.org/document/8333011",
+			"title": "ICtCp Versus Y'CbCr: Evaluation of ICtCp Color Space and an Adaptive Reshaper for HDR and WCG",
+			"publisher": "IEEE Consumer Electronics Magazine",
+			"date": "May 2018"
 		},
 		"Rec_BT.814": {
 			"title": "Specifications of PLUGE test signals and alignment procedures for setting of brightness and contrast of displays",
 			"href": "https://www.itu.int/dms_pubrec/itu-r/rec/bt/R-REC-BT.814-4-201807-I!!PDF-E.pdf",
 			"publisher": "ITU",
-			"rawDate": "2018-07"
+			"date": "July 2018"
 		},
 		"Rec_BT.2100": {
 			"title": "ITU-R BT.2100-2 Image parameter values for high dynamic range television for use in production and international programme exchange",
 			"href": "https://www.itu.int/dms_pubrec/itu-r/rec/bt/R-REC-BT.2100-2-201807-I!!PDF-E.pdf",
 			"publisher": "ITU",
-			"rawDate": "2018-07-00"
+			"date": "July 2018"
+		},
+		"Rec_BT.2124": {
+			"title": "ITU-R BT.2124-0 Objective metric for the assessment of the potential visibility of colour differences in television",
+			"href": "https://www.itu.int/dms_pubrec/itu-r/rec/bt/R-REC-BT.2124-0-201901-I!!PDF-E.pdf",
+			"publisher": "ITU",
+			"sate": "January 2019"
 		},
 		"Rec_BT.2390": {
 			"href": "https://www.itu.int/dms_pub/itu-r/opb/rep/R-REP-BT.2390-8-2020-PDF-E.pdf",
 			"title": "ITU-R BT.2390-8 High dynamic range television for production and international programme exchange",
 			"publisher": "ITU",
-			"rawDate": "2020-02-00"
+			"date": "February 2020"
 		},
 		"Rpt_BT.2408": {
 			"href": "https://www.itu.int/dms_pub/itu-r/opb/rep/R-REP-BT.2408-2017-PDF-E.pdf",
 			"title": "Report ITU-R BT.2408-0 Operational practices in HDR television production",
 			"publisher": "ITU",
-			"rawDate": "2017-10"
+			"date": "October 2017"
 		},
 		"Safdar-PUCS": {
 			"authors": [
@@ -81,15 +98,20 @@ WPT Display: open
 			"href": "https://opg.optica.org/oe/fulltext.cfm?uri=oe-25-13-15131&id=368272",
 			"title": "Perceptually uniform color space for image signals including high dynamic range and wide gamut",
 			"publisher": "Optics Express, vol 24 no 13 pp. 15131-15151",
-			"rawDate": "2017-06-26"
+			"date": "26 June 2017"
 		},
 		"SMPTE-ST-2084": {
 			"href": "https://pub.smpte.org/latest/st2084/st2084-2014.pdf",
 			"title": "ST 2084:2014 - SMPTE Standard - High Dynamic Range Electro-Optical Transfer Function of Mastering Reference Displays",
 			"publisher": "SMPTE",
-			"rawDate": "2014-08-29",
+			"date": "29 August 2014",
 			"abstract": "This standard specifies an EOTF characterizing high-dynamic-range reference displays used primarily for mastering non-broadcast content. This standard also specifies an Inverse-EOTF derived from the EOTF.",
 			"isbn": "978-1-61482-829-7"
+		},
+		"What_is_ICtCp": {
+			"href": "https://professional.dolby.com/siteassets/pdfs/ictcp_dolbywhitepaper_v071.pdf",
+			"title": "What is ICtCp, v7.1",
+			"publisher": "Dolby"
 		}
 	}
 </pre>
@@ -135,7 +157,7 @@ Value Definitions {#values}
 	also accept the <a>CSS-wide keywords</a> as their property value.
 	For readability they have not been repeated explicitly.
 
-Controlling Dynamic Range {#controlling-dynamic-range}
+HDR Terminology {#terminology}
 ==========================
 
 Defining Dynamic Range {#defining-dynamic-range}
@@ -152,20 +174,30 @@ One stop is a doubling of luminance.
 	  } 
 </xmp>
 
+<dfn export>Media white</dfn>,
+also called HDR Reference White,
+is the color of a normal white background, 
+or of white text on a dark background.
+It can be comfortably viewed, over the whole screen.
+
 In <dfn export>Standard Dynamic Range</dfn> (SDR),
-the media white (the color of a normal white background, 
-or of white text on a dark background)
-is the lightest possible color.
+media white is also
+lightest possible color,
+produced by full-intensity red, green, and blue.
 
 <div class="example" id="ex-SDR-dynamic-range">
 	For example, in [=sRGB=], 
+	under standard viewing conditions,
 	white is defined to have a luminance of 80 cd/m²
 	while black is defined to have a luminance of 0.2 cd/m².
 	Thus, the dynamic range is 8.6 stops.
 </div>
 
-For SDR, [=luminance=] is treated as <em>relative</em> to media white.
-Making the screen brighter does not change the dynamic range,
+It is common to adjust the overall brighness of the screen
+to acommodate user preference or viewing conditions 
+which are different to the standard ones.
+
+For SDR, making the screen brighter does not change the dynamic range,
 because the darkest color also gets brighter.
 
 <div class="example" id="ex-SDR-brighter-dynamic-range">
@@ -176,9 +208,9 @@ because the darkest color also gets brighter.
 </div>
 
 In <dfn export>High Dynamic Range</dfn> (HDR),
-brighter colors than media white can be displayed.
-For example, if media white on an HDR display is set to around 200 cd/m²
-it might be possible to display highlights at 1000 cd/m².
+brighter colors than [=media white=] can be displayed.
+For example, if media white on an HDR display is set to 203 cd/m²
+it might be possible to display small highlights at 1000 cd/m².
 Typically, the brightest colors can only be displayed
 on a small part of the display,
 and for a limited time.
@@ -191,25 +223,39 @@ This is because of energy usage and heating considerations.
 	Thus, the dynamic range is 14.3 stops.
 </div>
 
-For HDR, [=luminance=] is treated as <em>absolute</em>,
-rather than being relative to media white.
-Using a brighter screen increases the dynamic range,
+For HDR, using a brighter screen increases the dynamic range,
 while the luminance of media white remains constant.
 
 <div class="example" id="ex-HDR-PQ-dynamic-range">
 	For example, using the ''rec2100-pq'' colorspace 
 	defined in [[Rec_BT.2100]], 
-	the brightest peak white is defined to have a luminance of 10000 cd/m²
+	the brightest peak white is defined to have a luminance of 10,000 cd/m²
 	while the deepest black has a luminance of 0.001 cd/m².
 	Thus, the encoded dynamic range is 23.3 stops.
 </div>
 
+Issue: add a diagram showing SDR and HDR dynamic ranges on a log scale
+
+When [[#Compositing-SDR-HDR]], 
+and for color space conversion,
+the media white for SDR content
+should be anchored at <strong>203 cd/m²</strong> [[!Rpt_BT.2408]]
+so that that the media white level 
+of the inputs to compositing
+will end up at the media white level 
+of the combined signal.
+
+When displaying HDR (or mixed SDR and HDR) content,
+for displays which are less capable than the reference mastering display,
+and for viewing conditions different to the standard ones,
+a <dfn export>color re-rendering</dfn> step ((OOTF) will be performed.
+This may result in a media white being displayed
+at a value lower or higher than 203 cd/m².
+
 Introducing Headroom {#introducing-headroom}
 --------------------------------------------
 
-	<em>This section is non-normative</em>
-
-	The luminance level 
+	The peak [=luminance=] level 
 	which an HDR display can produce 
 	varies greatly.
 
@@ -226,12 +272,12 @@ Introducing Headroom {#introducing-headroom}
 
 <div class="example" id="ex-low-headroom">
 	For example, a low-end HDR display
-	(which just meets the requirements of
+	(which <em>just</em> meets the requirements of
 	<a href="https://displayhdr.org/">DisplayHDR 400</a>, 
 	the lowest tier of Vesa Certified DisplayHDR conformance [[DisplayHDR]])
 	might display media white at 
 	up to 200 cd/m<sup>2</sup>
-	while their peak white is only
+	while the peak white is only
 	400 cd/m<sup>2</sup>
 	(at the brightest media white, only one stop of HDR headroom).
 </div>
@@ -286,13 +332,16 @@ Introducing Headroom {#introducing-headroom}
 	to allow meaningful evaluation of the group of photos.
 </div>
 
+Controlling Dynamic Range {#controlling-dynamic-range}
+==========================
+
 The 'dynamic-range-limit' property {#the-dynamic-range-limit-property}
 -------------------------------
 	
 	<pre class='propdef'>
 		Name: dynamic-range-limit
-		Value: standard | high | constrained-high | <<dynamic-range-limit-mix()>>
-		Initial: high
+		Value: standard | no-limit | constrained-high | <<dynamic-range-limit-mix()>>
+		Initial: no-limit
 		Applies to: all elements
 		Inherited: yes
 		Percentages: n/a
@@ -315,7 +364,7 @@ The 'dynamic-range-limit' property {#the-dynamic-range-limit-property}
 			that is displayed is the same as
 			media white, i.e. the CSS color ''white''.
 		</dd>
-		<dt><dfn>high</dfn>
+		<dt><dfn>no-limit</dfn>
 		<dd>
 			The highest peak luminance
 			that is displayed is much greater than
@@ -342,7 +391,7 @@ The 'dynamic-range-limit' property {#the-dynamic-range-limit-property}
 Mixing Dynamic Range Limits: the ''dynamic-range-limit-mix()'' function {#dynamic-range-limit-mix}
 --------------------------------------------------------
 
-	This function takes two 'dynamic-range-limit' values,
+	This function takes two or more 'dynamic-range-limit' values,
 	converts them internally to a value in stops above media white,
 	and alters the display to the result of mixing them
 	by the specified amount.
@@ -350,7 +399,7 @@ Mixing Dynamic Range Limits: the ''dynamic-range-limit-mix()'' function {#dynami
 
 
 <pre class='prod'>
-	<dfn>dynamic-range-limit-mix()</dfn> = dynamic-range-limit-mix( [ <<ident>> && <<percentage [0,100]>> ]#)
+	<dfn>dynamic-range-limit-mix()</dfn> = dynamic-range-limit-mix( [ <<'dynamic-range-limit'>> && <<percentage [0,100]>> ]#{2,} )
 </pre>
 
 <wpt>
@@ -366,7 +415,7 @@ Mixing Dynamic Range Limits: the ''dynamic-range-limit-mix()'' function {#dynami
 	Computed Value for 'dynamic-range-limit'
 </h3>
 
-	If the specified value is ''standard'', ''constrained-high'', or ''high'', then the computed value is the specified value.
+	If the specified value is ''standard'', ''constrained-high'', or ''no-limit'', then the computed value is the specified value.
 
 	If the specified value is ''dynamic-range-limit-mix()'', then the computed value is determined by the following algorithm:
 
@@ -375,13 +424,13 @@ Mixing Dynamic Range Limits: the ''dynamic-range-limit-mix()'' function {#dynami
 	3. Define the contributing percentages as:
 		* Let <var>p1_standard</var>,...,<var>pN_standard</var> be the percentages for ''standard'' in <var>v1</var>,...,<var>vN</var>
 		* Let <var>p1_constrained_high</var>,...,<var>pN_constrained_high</var> be the percentages for ''constrained-high'' in <var>v1</var>,...,<var>vN</var>
-		* Let <var>p1_high</var>,...,<var>pN_high</var> be the percentages for ''high'' in <var>v1</var>,...,<var>vN</var>
+		* Let <var>p1_no_limit</var>,...,<var>pN_no_limit</var> be the percentages for ''no-limit'' in <var>v1</var>,...,<var>vN</var>
 	4. Compute the weighted sums as:
 		* <var>p_standard</var>=(<var>p1_standard</var>*<var>p1</var>+...+<var>pN_standard</var>*<var>pN</var>)/100.
 		* <var>p_constrained_high</var>=(<var>p1_constrained_high</var>*<var>p1</var>+...+<var>pN_constrained_high</var>*<var>pN</var>)/100.
-		* <var>p_high</var>=(<var>p1_high</var>*<var>p1</var>+...+<var>pN_high</var>*<var>pN</var>)/100.
-	5. If <var>p_standard</var>, <var>p_constrained_high</var>, or <var>p_high</var> equals 100%, then the computed value is ''standard'', ''constrained-high'', or ''high'', respectively.
-	6. Otherwise, the computed value is ''dynamic-range-limit-mix()'', with parameters ''standard'', ''constrained-high'', and ''high'', in that order, and percentages <var>p_standard</var>, <var>p_constrained_high</var>, and <var>p_high</var>, omitting parameters with a percentage equal to 0%.
+		* <var>p_no_limit</var>=(<var>p1_no_limit</var>*<var>p1</var>+...+<var>pN_no_limit</var>*<var>pN</var>)/100.
+	5. If <var>p_standard</var>, <var>p_constrained_high</var>, or <var>p_no_limit</var> equals 100%, then the computed value is ''standard'', ''constrained-high'', or ''no-limit'', respectively.
+	6. Otherwise, the computed value is ''dynamic-range-limit-mix()'', with parameters ''standard'', ''constrained-high'', and ''no-limit'', in that order, and percentages <var>p_standard</var>, <var>p_constrained_high</var>, and <var>p_no_limit</var>, omitting parameters with a percentage equal to 0%.
 
 	<wpt>
 		computed.html
@@ -393,11 +442,11 @@ Mixing Dynamic Range Limits: the ''dynamic-range-limit-mix()'' function {#dynami
 	dynamic-range-limit-mix(
 	    high 10%,
 	    dynamic-range-limit-mix(standard 25%, constrained-high 75%) 20%,
-	    dynamic-range-limit-mix(constrained-high 10%, high 30%) 20%)
+	    dynamic-range-limit-mix(constrained-high 10%, no-limit 30%) 20%)
 	</pre>
 	is
 	  <pre class="lang-css">
-	    dynamic-range-limit-mix(standard 10%, constrained-high 40%, high 50%)
+	    dynamic-range-limit-mix(standard 10%, constrained-high 40%, no-limit 50%)
 	</pre>
 	</div>
 
@@ -455,11 +504,6 @@ Predefined color spaces for HDR: {#predefined-HDR}
 	is at 5 cd/m².
 
 	ITU Reference 2100 is used for HDR 4k and 8k television.
-
-	In contrast to SDR color spaces and some HDR color spaces,
-	the PQ values are <em>absolute</em> rather than relative.
-
-	Issue: add a diagram showing SDR and HDR dynamic ranges on a log scale
 
 	It has the following characteristics:
 	(The display primaries are the same as [[!Rec.2020]]):
@@ -526,7 +570,9 @@ Predefined color spaces for HDR: {#predefined-HDR}
 
 	Issue: add other examples, including encoding of sRGB red, green, blue and P3 red, green, blue.
 
-	Linear-light RGB signals are converted to PQ encoded as follows. An absolute luminance scale is used, so the luminance of diffuse (media) white is required to scale relative luminances. The maximum encodable value (peak, small-area white) in PQ is 10,000 cd/m². Media white is 203 cd/m² [[!Rpt_BT.2408]].
+	Linear-light RGB signals are converted to PQ encoded as follows.
+	The maximum encodable value (peak, small-area white) in PQ is 10,000 cd/m². 
+	Media white is 203 cd/m² [[!Rpt_BT.2408]].
 
 	<!-- From Froehlich p.42
 		and BT.2100 Table 4 p.4 Reference PQ OETF
@@ -534,8 +580,8 @@ Predefined color spaces for HDR: {#predefined-HDR}
 
 	<pre class="lang-javascript">
 		var Er;			// the red, green or blue component, [0, 1] for SDR, [0, 70ish] for HDR
-		var Yw = 203;	// the absolute luminance of diffuse white, cd/m²
-		var x = Er * Yw / 10000; 	// absolute luminance of peak white is 10,000 cd/m².
+		var Yw = 203;	// the luminance of diffuse white, cd/m²
+		var x = Er * Yw / 10000; 	// luminance of peak white is 10,000 cd/m².
 		const n = 2610 / (2 ** 14);
 		const m = 2523 / (2 ** 5);
 		const c1 = 3424 / (2 ** 12);
@@ -558,8 +604,8 @@ Predefined color spaces for HDR: {#predefined-HDR}
 		const c2 = 2413 / (2 ** 7);
 		const c3 = 2392 / (2 ** 7);
 		var x = (((Math.max(((xPQ ** minv) - c1), 0) / (c2 - (c3 * (xPQ ** minv)))) ** ninv);
-		var Yw = 203;			// the absolute luminance of diffuse white, cd/m²
-		var Ea = x * 10000; 	// absolute luminance, [0, 10,000].
+		var Yw = 203;			// the luminance of diffuse white, cd/m²
+		var Ea = x * 10000; 	// luminance, [0, 10,000].
 		var Er = x * 10000 / Yw; 	// luminance relative to diffuse white, [0, 70 or so].
 	</pre>
 
@@ -684,7 +730,7 @@ Predefined color spaces for HDR: {#predefined-HDR}
 	regardless of the actual bit depth (10 or 12 bits per component).
 
 	The color with red, green and blue all at 1.0 
-	represents HDR Reference White with an absolute luminance of 
+	represents [=media white=] with a luminance of 
 	203 cd/m².
 
 	<pre class="lang-css">color(rec2100-linear 1 1 1)</pre>
@@ -695,7 +741,7 @@ Predefined color spaces for HDR: {#predefined-HDR}
 		<pre class="lang-css">color(rec2100-linear 9.852 9.852 9.852)</pre>
 
 		represents a white highlight 
-		with an absolute luminance
+		with a luminance
 		of 9.852 × 203 = 1,999 cd/m².
 	</div>
 
@@ -840,7 +886,7 @@ Converting JzCzHz colors to Jzazbz  colors</h4>
 <dfn export>ICtCp</dfn> {#ICtCp}
 -----------------
 
-	The ''ICtCp'' color space
+	The ''ICtCp'' color space [[!Perrin]]
 	is defined as Constant Intensity IC<sub>T</sub>C<sub>P</sub> signal format
 	in [[!Rec_BT.2100]] and accepts three numeric parameters,
 	with I representing the Intensity
@@ -855,7 +901,7 @@ Converting JzCzHz colors to Jzazbz  colors</h4>
 	the Hunt-Pointer-Estevez (HPE) XYZ to LMS transform
 	is used,
 	normalized to a [=D65=] whitepoint.
-	A crosstalk matrix is then applied,
+	A 4% crosstalk matrix is then applied  [[What_is_ICtCp]],
 	to reduce the gamut hull concavities of BT.2020 RGB,
 	thus reducing interpolation errors.
 	The crosstalk also provides improved lines of constant hue
@@ -886,11 +932,12 @@ Converting JzCzHz colors to Jzazbz  colors</h4>
 	by a conversion from linear-light BT.2100 RGB [[Rec_BT.2100]],
 	this conversion proceeds via LMS
 	and thus, any other color space can also be represented
-	by applying an XYZ to LMS transform.
+	by applying an XYZ to LMS transform
+	as shown in [[What_is_ICtCp]].
 
-	Note that unlike Lab, a [=D65=] whitepoint is used.
+	Note that unlike CIE ''Lab'', a [=D65=] whitepoint is used.
 
-	Also unlike Lab, which has primarily been tested with
+	Also unlike ''Lab'', which has primarily been tested with
 	lower-intensity reflective colors,
 	IC<sub>T</sub>C<sub>P</sub> has been tested with
 	high-chroma,
@@ -931,19 +978,20 @@ are correctly handled
 and not clipped or gamut mapped until
 the final transfer to the device color space.
 
-Relative HDR, using the HLG transfer function,
+HDR using the HLG transfer function,
 must map SDR media white
 to the same luminance as is used
 to display the 75% HLG value. [[!SMPTE-ST-2084]]
 
 For further details, see also tables 3 and 4 in ITU Rpt_BT.2408-0 [[!Rpt_BT.2408]]
 
-Absolute HDR, using the PQ transfer function,
+HDR using the PQ transfer function,
 should map SDR media white
 to 203 cd/m², the same luminance as is used
-to display the 58% PQ value. [[!SMPTE-ST-2084]]
+to display the 58% PQ value. [[!SMPTE-ST-2084]].
+
 However, implementations may chose to incorporate
-a color re-rendering step (OOTF)
+a color re-rendering step
 to account for non-reference viewing conditions.
 
 <!--
@@ -998,7 +1046,121 @@ Serializing values of the ''color()'' function</h3>
 	is recommended for internal storage).
 	Values must be <a href="https://drafts.csswg.org/css-values-4/#combine-integers">rounded towards +∞</a>, not truncated.
 
+<!--
+ ██████   ███████  ████████  ████████
+██    ██ ██     ██ ██     ██ ██
+██       ██     ██ ██     ██ ██
+██       ██     ██ ██     ██ ██████
+██       ██     ██ ██     ██ ██
+██    ██ ██     ██ ██     ██ ██
+ ██████   ███████  ████████  ████████
+-->
 
+<h2 id="color-conversion-code">
+	Sample code for Color Conversions</h2>
+	
+	<em>This section is not normative.</em>
+	<wpt title="This section is not normative, it does not need tests."></wpt>
+	
+	
+	For clarity, <a href="https://drafts.csswg.org/css-color-4/multiply-matrices.js">a library</a> is used for matrix multiplication.
+	(This is more readable than inlining all the multiplies and adds).
+	The matrices are in <a href="https://www.scratchapixel.com/lessons/mathematics-physics-for-computer-graphics/geometry/row-major-vs-column-major-vector">column-major order</a>.
+	
+	This code also assumes all of the conversion code from
+	[[css-color-4#color-conversion-code]] is available.
+
+	The LMS used in ''Jzazbz'' are not the same
+	as the ones used in ''ICtCp'',
+	take care to use the right ones!
+
+<h3 id="rec2100-linear_code">
+	Sample code for ''rec2100-linear''
+</h3>
+
+The BT.2020 and BT.2100 color spaces 
+use the same RGB primaries and white point,
+and both place media white at a component value of 1.0.
+
+<pre class="include-code lang-javascript">
+	path: rec2100-linear.js
+	highlight: js
+</pre>
+
+<h3 id="rec2100-pq_code">
+	Sample code for ''rec2100-pq''
+</h3>
+
+<pre class="include-code lang-javascript">
+	path: rec2100-pq.js
+	highlight: js
+</pre>
+
+<h3 id="rec2100-hlg_code">
+	Sample code for ''rec2100-hlg''
+</h3>
+
+<pre class="include-code lang-javascript">
+	path: rec2100-hlg.js
+	highlight: js
+</pre>
+
+<h3 id="ictcp_code">
+	Sample code for ''ICtCp''
+</h3>
+
+Rather than first requiring 
+conversion to ''rec2100-linear'',
+which is how the conversion is defined in [[!Rec_BT.2100]],
+this sample code proceeds directly from absolute CIE XYZ
+for compatibility with the other color conversion code.
+
+The 4% crosstalk matrix, and the rotation ,
+are also built into the XYZ to LMS step,
+rather than being applied as three separate steps.
+
+The end result is identical, this just takes fewer steps.
+
+<pre class="include-code lang-javascript">
+	path: ICtCp.js
+	highlight: js
+</pre>
+
+
+
+
+<!--
+████████  ████████ ██     ████████    ███         ████████
+██     ██ ██       ██        ██      ██ ██        ██
+██     ██ ██       ██        ██     ██   ██       ██
+██     ██ ██████   ██        ██    ██     ██      ██████
+██     ██ ██       ██        ██    █████████      ██
+██     ██ ██       ██        ██    ██     ██      ██
+████████  ████████ ████████  ██    ██     ██      ████████
+-->
+
+<h2 id="deltaE">
+	Sample code for ΔEITP Color Differences
+</h2>
+
+<em>This section is not normative.</em>
+<wpt title="This section is not normative, it does not need tests."></wpt>
+
+The ΔEITP [[Rec_BT.2124]] color difference metric 
+may be used to measure the perceptual color difference between 
+two display-referred colors
+in an HDR or mixed SDR/HDR context,
+for example in display calibration
+or gamut and tone mapping.
+
+It is a Euclideam distance in ''ICtCp'' color space,
+scaled such that a ΔEITP of 1.0
+represents one just-noticeable difference.
+
+<pre class="include-code lang-javascript">
+	path: deltaEITP.js
+	highlight: js
+	</pre>
 
 <!-- Sample section {#sample-topic}
 ==============================
@@ -1179,7 +1341,6 @@ For: @some-at-rule
 
 (A required descriptor can use `Initial: n/a</code>.) -->
 
-Issue: Do the PQ-based color spaces require tone-mapping (OOTF) for display in different viewing environments?
 
 <h2 class=no-num id=privacy>Privacy Considerations</h2>
 
