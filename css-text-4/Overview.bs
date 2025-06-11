@@ -214,6 +214,7 @@ Introduction</h2>
 	overflow-wrap/crashtests/overflow-wrap-leading-floats-crash.html
 	text-autospace/crashtests/text-autospace-shape-cache-crash.html
 	text-indent/text-indent-ruby-crash.html
+	hyphens/hyphens-auto-wordbreak-breakall-crash.html
 	</wpt>
 
 <h3 id="placement">
@@ -285,7 +286,7 @@ Languages and Typesetting</h3>
 	Note: Authors can declare the [=content language=]
 	using the global <code>lang</code> attribute in HTML
 	or the universal <code>xml:lang</code> attribute in XML.
-	See the <a spec=html lt=language>rules for determining the content language of an HTML element</a>
+	See the <a spec=html lt=language for=Node>rules for determining the content language of an HTML element</a>
 	in <cite>HTML</cite>,
 	and the [[XML#sec-lang-tag|rules for determining the content language of an XML element]] in <cite>XML 1.0</cite>.
 	[[HTML]]
@@ -792,7 +793,7 @@ Case Transforms: the 'text-transform' property</h3>
 
 		<dt><dfn>math-auto</dfn>
 		<dd>
-			See [[mathml-core#new-text-transform-values]].
+			See [[mathml-core#math-auto-transform]].
 
 			<wpt>
 			text-transform/math/text-transform-math-auto-001.html
@@ -1926,6 +1927,7 @@ White Space Collapsing: the 'white-space-collapse' property</h3>
 				word-break/break-boundary-2-chars-001.html
 				word-break/word-break-break-all-062.html
 				word-break/word-break-keep-all-063.html
+				white-space/white-space-intrinsic-size-021.html
 			</wpt>
 			<wpt title="Indirect tests via 'white-space: nowrap':">
 				hanging-punctuation/hanging-punctuation-allow-end-001.xht
@@ -2016,6 +2018,7 @@ White Space Collapsing: the 'white-space-collapse' property</h3>
 				word-break/auto-phrase/word-break-auto-phrase-wbr-nobr-002.html
 				word-break/break-boundary-2-chars-002.html
 				word-break/word-break-break-word-crash-001.html
+				white-space/white-space-intrinsic-size-021.html
 			</wpt>
 
 		<dt><dfn>preserve</dfn>
@@ -2128,6 +2131,7 @@ White Space Collapsing: the 'white-space-collapse' property</h3>
 				white-space/white-space-intrinsic-size-015.html
 				white-space/white-space-intrinsic-size-016.html
 				white-space/white-space-intrinsic-size-018.html
+				white-space/white-space-intrinsic-size-021.html
 				white-space/white-space-letter-spacing-001.html
 				white-space/white-space-normal-011.html
 				white-space/white-space-pre-011.html
@@ -2405,6 +2409,7 @@ White Space Collapsing: the 'white-space-collapse' property</h3>
 				white-space/white-space-intrinsic-size-013.html
 				white-space/white-space-intrinsic-size-014.html
 				white-space/white-space-intrinsic-size-017.html
+				white-space/white-space-intrinsic-size-021.html
 				white-space/white-space-letter-spacing-001.html
 				white-space/white-space-pre-032.html
 				white-space/white-space-pre-wrap-justify-001.html
@@ -2597,6 +2602,7 @@ White Space Collapsing: the 'white-space-collapse' property</h3>
 				white-space/white-space-applies-to-text-001.html
 				white-space/white-space-intrinsic-size-019.html
 				white-space/white-space-intrinsic-size-020.html
+				white-space/white-space-intrinsic-size-021.html
 				white-space/white-space-letter-spacing-001.html
 				white-space/white-space-pre-035.html
 				word-break/break-boundary-2-chars-001.html
@@ -2627,6 +2633,7 @@ White Space Collapsing: the 'white-space-collapse' property</h3>
 					<wpt>
 					white-space/white-space-intrinsic-size-001.html
 					white-space/white-space-intrinsic-size-002.html
+					white-space/white-space-intrinsic-size-021.html
 					</wpt>
 
 				<li>
@@ -2650,6 +2657,7 @@ White Space Collapsing: the 'white-space-collapse' property</h3>
 					white-space/break-spaces-010.html
 					white-space/break-spaces-051.html
 					white-space/break-spaces-052.html
+					white-space/break-spaces-with-word-break-001.html
 					white-space/white-space-pre-034.html
 					white-space/textarea-break-spaces-001.html
 					white-space/textarea-break-spaces-002.html
@@ -5519,6 +5527,7 @@ Selecting How to Wrap: the 'text-wrap-style' property</h3>
 		parsing/text-wrap-style-invalid.html
 		parsing/text-wrap-style-valid.html
 		parsing/text-wrap-pretty.html
+		white-space/text-wrap-balance-before-after-002.html
 	</wpt>
 
 	When wrapping is allowed
@@ -5570,6 +5579,7 @@ Selecting How to Wrap: the 'text-wrap-style' property</h3>
 				white-space/text-wrap-balance-overflow-002.html
 				white-space/text-wrap-balance-right-to-left.html
 				white-space/text-wrap-balance-top-to-bottom.html
+				white-space/text-wrap-balance-before-after-001.html
 			</wpt>
 
 			The remaining space to consider
@@ -6686,6 +6696,7 @@ Breaking Rules for Letters: the 'word-break' property</h3>
 			word-break/word-break-keep-all-003.html
 			word-break/word-break-keep-all-009.html
 			word-break/word-break-keep-all-010.html
+			white-space/break-spaces-with-word-break-001.html
 			</wpt>
 
 			Note: This is the other common behavior for Korean
@@ -7860,6 +7871,7 @@ Hyphenation Control: the 'hyphens' property</h4>
 			hyphens/hyphens-vertical-002.html
 			hyphens/hyphens-vertical-003.html
 			hyphens/hyphens-vertical-004.html
+			hyphens/hyphens-vs-float-clearance-002.html
 			</wpt>
 
 			<div class="example">
@@ -7905,6 +7917,7 @@ Hyphenation Control: the 'hyphens' property</h4>
 			hyphens/hyphens-auto-and-contenteditable-crash.html
 			hyphens/hyphens-auto-last-word-001.html
 			hyphens/hyphens-punctuation-001.html
+			hyphens/hyphens-vs-float-clearance-001.html
 			</wpt>
 	</dl>
 
@@ -8125,6 +8138,7 @@ Hyphenation Character Limits: the 'hyphenate-limit-chars' property</h4>
 
 	<wpt>
 		animations/hyphen-no-interpolation.html
+		animations/hyphen-limit-chars-interpolation.html
 		parsing/hyphenate-limit-chars-computed.html
 		parsing/hyphenate-limit-chars-invalid.html
 		parsing/hyphenate-limit-chars-valid.html
@@ -8470,7 +8484,7 @@ Overflow Wrapping: the 'overflow-wrap'/'word-wrap' property</h3>
 	</dl>
 
 	Issue: Do we need to add a <code>none</code> value to 'overflow-wrap'
-	to opt out of relaxing the ''keep-all' and ''auto-phrase'' restrictions
+	to opt out of relaxing the ''keep-all'' and ''word-break/auto-phrase'' restrictions
 	as allowed by ''overflow-wrap: normal''?
 
 	For legacy reasons, UAs must treat 'word-wrap'
@@ -9908,7 +9922,7 @@ Word Spacing: the 'word-spacing' property</h3>
 	word-spacing/word-spacing-negative-value-001.html
 	</wpt>
 
-	<dfn id="word-separator" lt="word-separator character | word separator">Word-separator characters</dfn>
+	<dfn export id="word-separator" lt="word-separator character | word separator">Word-separator characters</dfn>
 	are [=typographic character units=]
 	whose primary purpose and general usage is to separate words.
 	In Unicode this includes
@@ -10156,6 +10170,8 @@ Tracking: the 'letter-spacing' property</h3>
 	Whether letter-spacing is applied at the end of a line is undefined in this level.
 
 	<wpt>
+	letter-spacing/letter-spacing-trim-start-001.html
+	letter-spacing/letter-spacing-trim-start-002.html
 	letter-spacing/letter-spacing-end-of-line-001.html
 	tab-size/tab-size-spacing-001.html
 	letter-spacing/letter-spacing-200.html
@@ -10265,7 +10281,7 @@ Tracking: the 'letter-spacing' property</h3>
 			<bdo dir=ltr>&lt;p>ab&lt;span>c&#x5d0;&lt;/span>&#x5d1;&#x5d2;&lt;/p></bdo>
 		</pre>
 
-		<p class="ls-ex">a&#x3000;b</span>&#x3000;<span class="color-box">c</span>&#x3000;<span class="color-box">&#x5d0;</span>&#x3000;&#x5d1;&#x3000;&#x5d2;</p>
+		<p class="ls-ex">a&#x3000;b&#x3000;<span class="color-box">c</span>&#x3000;<span class="color-box">&#x5d0;</span>&#x3000;&#x5d1;&#x3000;&#x5d2;</p>
 	</div>
 
 	Letter spacing ignores invisible zero-width formatting characters
@@ -10555,6 +10571,10 @@ Automatic Contextual Spacing: the 'text-autospace' property</h3>
 			Creates extra spacing between runs of
 			<a>ideographs</a> and <a>non-ideographic letters</a>,
 			see [[#inter-script-spacing]].
+
+			<wpt>
+				text-autospace/text-autospace-ideogram-alpha-001.html
+			</wpt>
 
 		<dt><dfn>ideograph-numeric</dfn>
 		<dd>
@@ -11488,6 +11508,7 @@ First Line Indentation: the 'text-indent' property</h3>
 	text-indent/text-indent-min-max-content-001.html
 	text-indent/text-indent-overflow.html
 	text-indent/text-indent-text-align-end.html
+	text-indent/below-float.html
 	</wpt>
 
 	Unless otherwise specified
@@ -11699,7 +11720,7 @@ First Line Indentation: the 'text-indent' property</h3>
 	when specified on a block element, it will affect descendant
 	inline-block elements.
 	For this reason, it is often wise to specify ''text-indent: 0'' on
-	elements that are specified ''display: inline-block''.</p>
+	elements that are specified ''display: inline-block''.
 
 <h3 id="hanging">
 Hanging Glyphs</h3>
@@ -11839,7 +11860,7 @@ Hanging Punctuation: the 'hanging-punctuation' property</h4>
 	at the start or at the end of a line of text.
 
 	Note: If there is not sufficient padding on the
-	block container, 'hanging-punctuation' can trigger overflow.</p>
+	block container, 'hanging-punctuation' can trigger overflow.
 
 	Values have the following meanings:
 

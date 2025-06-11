@@ -3,7 +3,7 @@ Title: CSS Values and Units Module Level 5
 Group: CSSWG
 Shortname: css-values
 Level: 5
-Status: WD
+Status: ED
 Work Status: Exploring
 ED: https://drafts.csswg.org/css-values-5/
 TR: https://www.w3.org/TR/css-values-5/
@@ -16,6 +16,7 @@ Ignored Vars: Cn+1, n
 Inline Github Issues: no
 Default Highlight: css
 Status Text: <strong>This spec is in the early exploration phase. Feedback is welcome, and and major breaking changes are expected.</strong>
+Include MDN Panels: yes
 </pre>
 <pre class='link-defaults'>
 spec:css-color-4; type:property; text:color
@@ -24,16 +25,19 @@ spec:css-values-4; type: dfn;
 	text: keyword
 	text: identifier
 spec:selectors-4; type: dfn; text: selector
-spec:css-conditional-5; type:type; text:<size-feature>
-spec:css-conditional-5; type:dfn; text:container feature
-spec:css-conditional-5; type:type; text:<container-name>
-spec:css-conditional-5; type:at-rule; text:@container
-spec:css-conditional-5; type:type; text:<style-query>
-spec:css-conditional-5; type:type; text:<style-query>
+spec:css-conditional-5;
+	type:type;
+		text:<size-feature>
+		text:<container-name>
+		text:<style-query>
+	type:dfn; text:container feature
+	type:at-rule; text:@container
 spec:css-mixins-1; type:dfn; text:custom function
 spec:css-properties-values-api; type:dfn; text: supported syntax component names
 spec:html; type:element; text:link
-spec:infra; type:dfn; text:list
+spec:infra; type:dfn;
+	text:list
+	text:user agent
 </pre>
 <style>
 code, small { white-space: nowrap }
@@ -43,6 +47,23 @@ pre.value { font: inherit; white-space: pre-wrap; margin: 0; padding: 0; }
 dt + dt::before { content: ", "; }
 dl:not(.switch) dt { display: inline; }
 td > small { display: block; }
+</style>
+<style>
+/* Put nice boxes around each algorithm. */
+[data-algorithm]:not(.heading) {
+	padding: .5em;
+	border: thin solid #ddd; border-radius: .5em;
+	margin: .5em calc(-0.5em - 1px);
+}
+[data-algorithm]:not(.heading) > :first-child {
+	margin-top: 0;
+}
+[data-algorithm]:not(.heading) > :last-child {
+	margin-bottom: 0;
+}
+[data-algorithm] [data-algorithm] {
+	margin: 1em 0;
+}
 </style>
 
 <h2 id="intro">
@@ -133,7 +154,7 @@ Commas in Function Arguments</h4>
 		For example, the grammar of the ''random-item()'' function is:
 
 		<pre>
-			random-item( <<random-caching-options>>, [<<declaration-value>>?]# )
+			random-item( <<random-value-sharing>>, [<<declaration-value>>?]# )
 		</pre>
 
 		The ''#'' indicates comma-separated repetitions,
@@ -461,10 +482,12 @@ Request URL Modifiers</h4>
 		<dd>
 			The [=URL request modifier steps=] for this modifier given [=/request=] |req| are:
 
-			1. Set [=/request=]'s [=request/mode=] to "cors".
+			1. Set |req|'s [=request/mode=] to "cors".
 
 			2. If the given value is ''use-credentials'',
-				set [=/request=]'s [=request/credentials mode=] to "include".
+				set |req|'s [=request/credentials mode=] to "include".
+
+			3. Otherwise, set |req|'s [=request/credentials mode=] to "same-origin".
 
 		<dt><dfn><<integrity-modifier>></dfn> = <dfn function lt="integrity()">integrity</dfn>(<<string>>)
 		<dd>
@@ -746,44 +769,35 @@ Combination of <<position>></h4>
 	as a <<length-percentage>>.
 
 
-<!-- Big Text: interp
+<!-- Big Text: progress
 
-████ █    █▌ █████▌ █████▌ ████▌  ████▌
- ▐▌  █▌   █▌   █▌   █▌     █▌  █▌ █▌  █▌
- ▐▌  ██▌  █▌   █▌   █▌     █▌  █▌ █▌  █▌
- ▐▌  █▌▐█ █▌   █▌   ████   ████▌  ████▌
- ▐▌  █▌  ██▌   █▌   █▌     █▌▐█   █▌
- ▐▌  █▌   █▌   █▌   █▌     █▌ ▐█  █▌
-████ █▌   ▐▌   █▌   █████▌ █▌  █▌ █▌
+████▌  ████▌   ███▌   ███▌  ████▌  █████▌  ███▌   ███▌
+█▌  █▌ █▌  █▌ █▌  █▌ █▌  █▌ █▌  █▌ █▌     █▌  █▌ █▌  █▌
+█▌  █▌ █▌  █▌ █▌  █▌ █▌     █▌  █▌ █▌     █▌     █▌
+████▌  ████▌  █▌  █▌ █▌ ██▌ ████▌  ████    ███▌   ███▌
+█▌     █▌▐█   █▌  █▌ █▌  █▌ █▌▐█   █▌         █▌     █▌
+█▌     █▌ ▐█  █▌  █▌ █▌  █▌ █▌ ▐█  █▌     █▌  █▌ █▌  █▌
+█▌     █▌  █▌  ███▌   ███▌  █▌  █▌ █████▌  ███▌   ███▌
 -->
 
-<h2 id="progress">
-Interpolation Progress Functional Notations</h2>
+<h2 id="progress" oldids="progress-func">
+Interpolation Progress Calculations: the ''progress()'' notation</h2>
 
-	ISSUE(6245): This section is an exploratory draft, and not yet approved by the CSSWG.
-
-	The ''progress()'', ''media-progress()'', and ''container-progress()'' [=functional notations=]
-	represent the proportional distance
+	The <dfn>progress()</dfn> [=functional notation=]
+	represents the proportional distance
 	of a given value (the <dfn noexport>progress value</dfn>)
 	from one value (the <dfn noexport>progress start value</dfn>)
-	to another value (the <dfn noexport>progress end value</dfn>).
-	They allow drawing a progress ratio from
-	[=math functions=], [=media features=], and [=container features=],
-	respectively,
-	following a common syntactic pattern:
-
-	<pre class=prod>
-		<var ignore>progress-function</var>() = <var ignore>progress-function</var>( <var ignore>progress value</var> from <var ignore>start value</var> to <var ignore>end value</var> )
-	</pre>
-
-	Each resolves to a <<number>>
-	by [=calculating a progress function=].
+	to another value (the <dfn noexport>progress end value</dfn>),
+	each represented as a [=calculation=].
+	It is a [=math function=],
+	and can be input into other calculations
+	such as a [=math function=]
+	or a [=mix notation=].
 
 	<div algorithm>
-		To <dfn export>calculate a progress function</dfn>,
-		given a [=progress value=],
-		[=progress start value=],
-		and [=progress end value=]:
+		The result of ''progress()'' is a <<number>>
+		[=made consistent=] with the [=consistent type=] of its arguments,
+		resolved by <dfn noexport lt="calculate a progress function">calculating a progress function</dfn> as follows:
 
 		: If the [=progress start value=] and [=progress end value=] are different values
 		:: <code>([=progress value=] - [=progress start value=]) / ([=progress end value=] - [=progress start value=])</code>.
@@ -792,31 +806,12 @@ Interpolation Progress Functional Notations</h2>
 			depending on whether [=progress value=]
 			is equal to, less than, or greater than
 			the shared value.
-
-		Note: The return value is a plain <<number>>,
-		not [=made consistent=] with its arguments by default.
 	</div>
-
-	The resulting number can then be input into other calculations,
-	such as a [=math function=]
-	or a [=mix notation=].
-
-<h3 id="progress-func">
-Calculated Progress Values: the ''progress()'' notation</h3>
-
-	The <dfn>progress()</dfn> functional notation
-	returns a <<number>> value
-	representing the position of one [=calculation=]
-	(the [=progress value=])
-	between two other [=calculations=]
-	(the [=progress start value=]
-	and [=progress end value=]).
-	''progress()'' is a [=math function=].
 
 	The syntax of ''progress()'' is defined as follows:
 
 	<pre class=prod>
-		<dfn id=typedef-progress-fn><<progress()>></dfn> = progress(<<calc-sum>>, <<calc-sum>>, <<calc-sum>>)
+		<<progress()>> = progress(<<calc-sum>>, <<calc-sum>>, <<calc-sum>>)
 	</pre>
 
 	where the first, second, and third <<calc-sum>> values represent
@@ -827,101 +822,13 @@ Calculated Progress Values: the ''progress()'' notation</h3>
 	but must have a [=consistent type=]
 	or else the function is invalid.
 
-	The value of ''progress()'' is a <<number>>,
-	determined by [=calculating a progress function=],
-	then [=made consistent=] with the [=consistent type=] of its arguments.
-
 	ISSUE: Do we need a ''percent-progress()'' notation,
 	or do enough places auto-convert that it's not necessary?
 
+	ISSUE(11825): Should progress() functions clamp to 0-100%?
+
 	Note: The ''progress()'' function is essentially syntactic sugar
-	for a particular pattern of ''calc()'' notations,
-	so it's a [=math function=].
-
-<h3 id="media-progress-func">
-Media Query Progress Values: the ''media-progress()'' notation</h3>
-
-	Similar to the ''progress()'' notation,
-	the <dfn>media-progress()</dfn> functional notation
-	returns a <<number>> value
-	representing current value of the specified [=media query=]
-	[[!MEDIAQUERIES-4]]
-	as a [=progress value=]
-	between two explicit values of the [=media query=]
-	(as the [=progress start value=] and [=progress end value=]).
-
-	The syntax of ''media-progress()'' is defined as follows:
-
-	<pre class=prod>
-		<dfn><<media-progress()>></dfn> = media-progress(<<mf-name>>, <<calc-sum>>, <<calc-sum>>)
-	</pre>
-
-	where the value of the [=media feature=] corresponding to <<mf-name>>
-	represents the [=progress value=],
-	and the two <<calc-sum>> values represent
-	the [=progress start value=] and [=progress end value=],
-	respectively.
-
-	The specified [=media feature=] must be a valid “range” type feature,
-	the specified [=progress start value=] and [=progress end value=]
-	must be valid values for the specified [=media query=],
-	and both [=calculation=] values must have a [=consistent type=],
-	or else the function is invalid.
-
-	The [=progress start value=] and [=progress end value=] [=calculations=]
-	are interpreted as specified for the [=media feature=]
-	(rather than as specified by the context the function is used in).
-
-	The value of ''media-progress()'' is a <<number>>,
-	determined by [=calculating a progress function=].
-
-	Note: ''media-progress()'' is <em>not</em> a [=math function=];
-	it's just a function that evaluates to a <<number>>.
-
-<h3 id="container-progress-func">
-Container Query Progress Values: the ''container-progress()'' notation</h3>
-
-	The <dfn>container-progress()</dfn> functional notation
-	is identical to the ''media-progress()'' functional notation,
-	except that it accepts [=container features=] [[!CSS-CONTAIN-3]]
-	in place of [=media features=].
-
-	The syntax of ''container-progress()'' is defined as follows:
-
-	<pre class=prod>
-		<dfn><<container-progress()>></dfn> = container-progress(<<mf-name>> [ of <<container-name>> ]?, <<calc-sum>>, <<calc-sum>>)
-	</pre>
-
-	where <<mf-name>> represents a [=size feature=]
-	and the optional <<container-name>> component specifies
-	the named containers to consider when selecting a container
-	to resolve them against.
-	The value of the [=size feature=] is the [=progress value=],
-	and the two <<calc-sum>> values represent
-	the [=progress start value=] and [=progress end value=],
-	respectively.
-
-	The specified <<mf-name>> must be a valid [=size feature=],
-	the specified [=progress start value=] and [=progress end value=]
-	must be valid values for that [=size feature=],
-	and both [=calculation=] values must have a [=consistent type=],
-	or else the function is invalid.
-	''container-progress()'' is only valid in a property value context;
-	it cannot be used in, for example, a [=media query=].
-
-	The [=progress start value=] and [=progress end value=] [=calculations=]
-	are interpreted as specified for the [=size feature=]
-	(rather than as specified by the context the function is used in).
-	If no appropriate containers are found,
-	''container-progress()'' resolves its <<size-feature>> query
-	against the [=small viewport size=].
-
-	The value of ''media-progress()'' is a <<number>>,
-	determined by [=calculating a progress function=].
-
-	Note: ''container-progress()'' is <em>not</em> a [=math function=];
-	it's just a function that evaluates to a <<number>>.
-
+	for a particular pattern of ''calc()'' notations.
 
 <!-- Big Text: *-mix()
 
@@ -935,132 +842,86 @@ Container Query Progress Values: the ''container-progress()'' notation</h3>
 -->
 
 <h2 id="mixing">
-Mixing and Interpolation Notations: the *-mix() family</h2>
-
-	ISSUE(6245): This feature <a href="https://css.typetura.com/ruleset-interpolation/explainer/">does not handle multiple breakpoints very well</a>,
-	and <a href="https://github.com/w3c/csswg-drafts/issues/6245#issuecomment-2469190377">might need to be redesigned</a>.
+Weighted Average Notations: the *-mix() family</h2>
 
 	Several <dfn>mix notations</dfn> in CSS
-	allow representing the interpolation of two values,
-	the <dfn>mix start value</dfn> and the <dfn>mix end value</dfn>,
-	at a given point in progress between them (the <dfn>mix progress value</dfn>).
+	allow representing the weighted average of a set of values.
 	These [=functional notations=] follow the syntactic pattern:
 
 	<pre class=prod>
-		<var>mix-function</var>() = <var>mix-function</var>( <<progress>>, <l>[=mix start value|start-value=]</l>, <l>[=mix end value|end-value=]</l> )
+		<var>*mix</var>() = <var>*mix</var>( <var>options</var>? , [ <var>value</var> && <<percentage>>? ]# )
 	</pre>
+
+	where the <var>options</var> can provide type-specific mixing options,
+	and each <var>value</var> and optional <<percentage>> pair in the argument list
+	is a <dfn>mix item</dfn> representing
+	an input to the mix and its weight in the average.
 
 	The [=mix notations=] in CSS include:
 	* ''calc-mix()'',
-		for interpolating <<length>>, <<percentage>>, <<time>>,
+		for mixing <<length>>, <<percentage>>, <<time>>,
 		and other dimensions representable in ''calc()'' expressions
+	* ''transform-mix()'',
+		for mixing <<transform-list>>s
 	* ''color-mix()'',
-		for interpolating two <<color>> values
+		for mixing <<color>> values (see [[css-color-5]])
 	* ''cross-fade()'',
-		for interpolating <<image>> values
+		for mixing <<image>> values (see [[css-images-4]])
 	* ''palette-mix()'',
-		for interpolating two 'font-palette' values
+		for mixing 'font-palette' values (see [[css-fonts-4]])
 
-	and finally the generic ''mix()'' notation,
-	which can represent the interpolation of any property's values
-	(but only the property's entire value, not individual components).
+<h3 id="mix-percentage-normalization">
+Normalizing Mix Percentages</h3>
 
-	Note: The ''cross-fade()'' notation
-	also has an alternative syntax
-	that allows for mixing more than two values,
-	but does not allow for the more complex expressions of <<progress>>.
+	If the sum of the mix percentages are greater than 100%,
+	they are scaled down;
+	if it is less, any remaining percentage is distributed to values whose <<percentage>> is omitted,
+	or else assigned to a “none” type value as defined by the specific [=mix notation=].
 
-	ISSUE: The ''mix()'' notation also has a variant that takes a set of keyframes.
-	It does this by referring to an ''@keyframes'' rule,
-	and pulling the corresponding property declaration out of that.
-	It would be nice to allow the other mix notations to take keyframe also,
-	but how would we represent a set of keyframes for a [=component value=]
-	(rather than a full property value)?
+	<div algorithm>
+		To <dfn>normalize mix percentages</dfn>
+		given
+		* a [=/list=] of [=mix items=] |items|
+			(a value and optional percentage, each between 0% and 100% if specified)
+		* an optional |force normalization| flag
+			(defaulting to false),
 
-<h3 id="progress-type">
-Representing Interpolation Progress: the <<progress>> type</h3>
+		returning a list of [=mix items=] with normalized percentages
+		and a “leftover” percentage:
 
-	The <dfn><<progress>></dfn> value type represents
-	the [=mix progress value=] in a [=mix notation=],
-	and ultimately resolves to a percentage.
-	It can, however, draw that percentage value
-	from sources such as media queries and animation timelines,
-	and can also convert it through an [=easing function=]
-	before using it for interpolation.
+		1. Let |specified sum| be the sum of the percentages specified in |items|
+			(clamped to 100%),
+			or 0% if the percentages are omitted for all items.
+		2. For each omitted percentage in |items|,
+			set it to
+			<code>(100% - |specified sum|) / (number of omitted percentages)</code>.
+		3. Let |total| be the sum of the percentages of all the items.
+		4. If |total| is greater than 100%,
+			or if |total| is greater than 0% and the |force normalization| flag is true,
+			multiply every percentage in |items| by <code>(100% / |total|)</code>.
+		5. If |total| is less than 100%,
+			let |leftover| be <code>(100% - |total|)</code>.
+			Otherwise, let |leftover| be 0%.
+		6. Return |items| and |leftover|.
 
-	Its syntax is defined as follows:
-	<pre class=prod>
-		<<progress>> = [ <<percentage-token>> | <<number>> | <<'animation-timeline'>> ] && [ by <<easing-function>> ]?
-	</pre>
-
-	where:
-
-	<dl dfn-type=value dfn-for="<progress>">
-		<dt><dfn><<percentage-token>></dfn>
-		<dd>
-			Computes to the equivalent <<number>>:
-			''0%'' becomes ''0'',
-			''100%'' becomes ''1'',
-			etc.
-
-			Note: This only allows literal percentages,
-			like ''15%'';
-			calculations like ''calc(100% / 7)'' will not work,
-			as they will instead attempt to use the normal rules
-			for resolving a percentage against another type
-			(such as <<length>>, in 'width').
-			Use expressions like ''calc(1 / 7)'' instead.
-
-		<dt><dfn><<number>></dfn>
-		<dd>
-			Represents the [=mix progress value=].
-
-			Note: This allows the use of the ''progress()'',
-			''media-progress()'',
-			and ''container-progress()'' notations.
-
-		<dt><dfn><<'animation-timeline'>></dfn>
-		<dd>
-			Represents the [=mix progress value=]
-			as the progress of the specified [[web-animations-1#timelines|animation timeline]].
-			The values ''animation-timeline/none'' and ''animation-timeline/auto'', however,
-			are invalid.
-			[[!CSS-ANIMATIONS-2]] [[!WEB-ANIMATIONS-2]]
-
-		<dt><dfn><<easing-function>></dfn>
-		<dd>
-			Converts the specified input [=mix progress value=]
-			into an output [=mix progress value=]
-			using the specified [=easing function=].
-			[[!CSS-EASING-1]]
-	</dl>
-
-	Note: Progress values below ''0'' and above ''1'' are valid;
-	they allow representing interpolation beyond the range
-	defined by the start and end values.
-
-	Note: While <<progress>> itself can be a <<percentage>>,
-	mapping directly to the equivalent <<number>>,
-	a function that <em>resolves</em> to a <<number>>,
-	like ''progress()'',
-	resolves <<percentage>>s using the normal rules for the context;
-	for example, in 'width', they would be resolved against a length.
-
-	The [=computed value=] of a <<progress>> value specified with <<percentage>> or <<number>>
-	is the computed <<number>> converted through the <<easing-function>> (if any).
-	The [=computed value=] of a <<progress>> value specified with <<'animation-timeline'>>
-	is the computed <<'animation-timeline'>> and <<easing-function>> (if any).
+		Note: At the end of this algorithm, every percentage is set,
+		and the sum of all percentages is either 0%
+		(if they were all specified as 0% to begin with)
+		or 100%.
+		The |leftover| value will be applied to the usage-specific “none” type value
+		mixed into the final result.
+	</div>
 
 <h3 id="calc-mix">
-Interpolated Numeric and Dimensional Values: the ''calc-mix()'' notation</h3>
+Weighted Average of Numeric and Dimensional Values: the ''calc-mix()'' notation</h3>
 
 	The <dfn>calc-mix()</dfn> [=mix notation=]
-	represents an interpolated numeric or dimensional value.
+	represents a weighted average of numeric or dimensional value.
 	Like ''calc()'', it is a [=math function=],
 	with the following syntactic form:
 
 	<pre class=prod>
-		<dfn><<calc-mix()>></dfn> = calc-mix( <<progress>>, <<calc-sum>>, <<calc-sum>> )
+		<<calc-mix()>> = calc-mix( [ <<calc-sum>> <<percentage [0,100]>>? ]# )
 	</pre>
 
 	The <<calc-sum>> arguments can resolve
@@ -1068,156 +929,445 @@ Interpolated Numeric and Dimensional Values: the ''calc-mix()'' notation</h3>
 	but must have a [=consistent type=]
 	or else the function is invalid.
 	The result's type will be the [=consistent type=],
-	[=made consistent=] with the type of the <<progress>> value.
+	[=made consistent=] with the type of the <<calc-sum>> values.
 
 	The [=used value=] of a valid ''calc-mix()'' is
-	the result of interpolating these two values
-	to the progress given by <<progress>>.
-	If the <<progress>> value can be computed to a <<number>>,
-	then the [=computed value=] is likewise
-	the result of interpolating the two [=computed values=]
-	to that <<progress>> value
-	(in other words, ''A * (1-progress) + B * progress'')
-	it is otherwise the ''calc-mix()'' notation itself
-	with its arguments each computed according to their type.
+	the result of producing a weighted average of its <<calc-sum>> values,
+	with the weight of each item given by its corresponding <<percentage>>
+	after [=normalize mix percentage|normalizing these mix percentages=].
+	(Any “leftover” mix percentage is applied to a consistently-typed zero value,
+	and thus effectively discarded.)
 
-<h3 id="color-mix">
-Interpolated Color Values: the ''color-mix()'' notation</h3>
-
-	This specification extends the ''color-mix()'' [=functional notation=]
-	as a [=mix notation=] accepting the following syntaxes:
-
-	<pre class=prod>
-		<<color-mix()>> =
-		  color-mix( [ <<progress>> && <<color-interpolation-method>>? ] , <<color>>, <<color>> ) |
-		  color-mix( <<color-interpolation-method>>, [<<color>> && <<percentage [0,100]>>?]#{2} )
-	</pre>
-
-	The used value of the first [=mix notation=] variant
-	is equivalent to assigning the <<progress>> value,
-	as a <<percentage>>,
-	to the <<percentage>> of the second <<color>> argument in the second variant.
-	<span class=note>That is, ''color-mix(progress, color1, color2)'' is equivalent to ''color-mix(color1, color2 progress)''.</span>
-	See [[css-color-5#color-mix]] for the normative definition of the second variant.
-
-	ISSUE: <<progress>> allows returning percentages outside 0-100%,
-	but ''color-mix()'' doesn't allows such values,
-	so need to define how that gets processed.
-
-<h3 id="cross-fade">
-Interpolated Image Values: the ''cross-fade()'' notation</h3>
-
-	This specification extends the ''cross-fade()'' [=functional notation=]
-	as a [=mix notation=] accepting the following syntaxes:
-
-	<pre class=prod>
-		<<cross-fade()>> =
-		  cross-fade( <<progress>>, [ <<image>> | <<color>> ], [ <<image>> | <<color>> ] ) |
-		  cross-fade( <<cf-image>># )
-	</pre>
-
-	The used value of the first [=mix notation=] variant
-	is equivalent to assigning the <<progress>> value
-	as the <<percentage>> of the second <<color>> argument in the second variant.
-	<span class=note>That is, ''cross-fade(progress, image1, image2)'' is equivalent to ''cross-fade(image1, image2 progress)''.</span>
-	See [[css-images-4#cross-fade-function]] for the normative definition of the second variant.
-
+	The [=computed value=] of a valid ''calc-mix()'' is
+	its [=used value=] if all of the <<calc-sum>> and <<percentage>> values in it
+	can be resolved,
+	and is a ''calc-mix()'' notation
+	with each of its <<calc-sum>> and <<percentage>> values computed individually
+	otherwise.
 
 <h3 id="transform-mix">
-Interpolated Transform Values: the ''transform-mix()'' notation</h3>
+Weighted Average of Transform Values: the ''transform-mix()'' notation</h3>
 
 	The <dfn>transform-mix()</dfn> [=mix notation=]
-	represents an interpolated <<transform-list>>,
+	represents a weighted average of <<transform-list>>,
 	with the following syntactic form:
 
 	<pre class=prod>
-		<dfn><<transform-mix()>></dfn> = transform-mix( <<progress>>, <<transform-list>>, <<transform-list>> )
+		<<transform-mix()>> = transform-mix( [ <<transform-list>> && <<percentage [0,100]>> ]# )
 	</pre>
 
 	The [=used value=] of a valid ''transform-mix()'' is
-	the result of interpolating these two values
-	to the progress given by <<progress>>.
-	If the <<progress>> value can be computed to a <<percentage>>,
+	the result of producing a weighted average of its <<transform-list>> values,
+	with the weight of each item given by its corresponding <<percentage>>
+	after [=normalize mix percentage|normalizing these mix percentages=].
+	Any “leftover” mix percentage is applied to an [=identity transform=]
+	appended to the list.
+	The weighting can be calculated by
+	interpolating each <<transform-list>>
+	using its <<percentage>> weight as the interpolation progress
+	from the [=identity transform=] towards the <<transform-list>>.
+
+	If every <<percentage>> weight can be fully resolved,
 	and the <<transform-list>>s can be interpolated
 	without used-value-time information,
-	then the [=computed value=] is likewise
-	the result of interpolating the two [=computed values=]
-	to that <<progress>> value;
+	then the [=computed value=] is the [=used value=];
 	it is otherwise the ''transform-mix()'' notation itself
 	with its arguments each computed according to their type.
 
 	''transform-mix()'' is, itself, a <<transform-function>>.
 
-<h3 id="mix">
-Interpolated Property Values: the ''mix()'' notation</h3>
 
-	[=Interpolation=] of any two property values can be represented
-	by the <dfn>mix()</dfn> [=mix notation=],
-	which supports two alternative syntax patterns:
+<h2 id="interpolation-notation">
+Interpolation Mapping Notations: the *-interpolate() family</h2>
 
-	<pre class="prod">
-		<dfn><<mix()>></dfn> =
-		  mix( <<progress>> , <<whole-value>> , <<whole-value>> ) |
-		  mix( <<progress>> && of <<keyframes-name>> )
+	Several <dfn>interpolation notations</dfn> in CSS
+	allow representing an interpolated value
+	corresponding to a certain amount of <dfn>interpolation progress</dfn>
+	along a defined scale or mapping function
+	(the <dfn>interpolation map</dfn>).
+	The [=functional notations=] follow the syntactic pattern:
+
+	<pre class=prod>
+		<var>*interpolate</var>() = <var>*interpolate</var>( [ <var>progress</var> && <var>global-options</var>? ],
+		                               <var>stop</var>, [  <var>between-options</var>? , <var>stop</var> ]# )
 	</pre>
 
-	The first syntax alternative, like other [=mix notations=],
-	interpolates between the first <<whole-value>> (its [=mix start value=])
-	and the second <<whole-value>> (its [=mix end value=]).
-	The second uses the [=mix progress value=]
-	to interpolate the corresponding property declarations from a set of keyframes,
-	allowing for more complex interpolation curves.
+	Where:
+	* |progress| specifies the input position into the [=interpolation map=]; see [[#interpolation-progress-arguments]]
+	* |global-options| specifies additional options for the interpolation as a whole,
+		and defaults for the between-stop interpolation options.
+	* |stop| represents an [=interpolation stop=]; see [[#interpolation-map-arguments]]
+	* |between-options| specifies options for the interpolation between the two surrounding stops.
 
-	For the standard [=mix notation=] variant,
-	if the two <<whole-value>>s being interpolated by ''mix()''
-	are [=interpolation|interpolable=]
-	as values for the property in which it is specified,
-	and the interpolated value can be represented without ''mix()'',
-	the [=computed value=] of ''mix()'' is
-	the result of interpolating these two values
-	to the progress given by <<progress>>.
+	The [=interpolation notations=] in CSS include:
+	* ''calc-interpolate()'',
+		for interpolating <<length>>, <<percentage>>, <<time>>,
+		and other dimensions representable in ''calc()'' expressions
+	* ''transform-interpolate()'',
+		for interpolating <<transform-list>>s
+	* ''color-interpolate()'',
+		for interpolating <<color>> values
+	* ''palette-interpolate()'',
+		for interpolating 'font-palette' values
+
+	and finally the generic ''interpolate()'' notation,
+	which can represent the interpolation of any property’s values
+	(but only the property’s entire value, not individual components).
+
+	ISSUE: The ''interpolate()'' notation also has a variant that takes a set of keyframes.
+	It does this by referring to an ''@keyframes'' rule,
+	and pulling the corresponding property declaration out of that.
+	It would be nice to allow the other mix notations to take keyframe also,
+	but how would we represent a set of keyframes for a [=component value=]
+	(rather than a full property value)?
+
+<h3 id="interpolation-syntax">
+Global Syntax of the *-interpolate() family</h3>
+
+	The generic syntax of the [=interpolation notations=] is as follows:
+
+	<pre class=prod>
+		<var>interpolate-function</var>() = <var>interpolate-function</var>(
+			[
+				<<progress-source>> && [ by <<easing-function>> ]?
+				&& <<easing-function>>? && <<segment-options>>?
+			] ,
+			<<input-position>>{1,2} : <<output-value>> ,
+			[ [ <<easing-function>> || <<segment-options>> ]? , <<input-position>>{1,2} : <<output-value>> ]#?
+		)
+	</pre>
+
+	These represent the [=interpolation progress=] and [=interpolation map=]
+	as described below.
+
+<h4 id="interpolation-progress-arguments">
+Specifying the Interpolation Progress</h4>
+
+	The <dfn><<progress-source>></dfn> value type represents
+	the [=interpolation progress=] in an [=interpolation notation=].
+	Its syntax is:
+
+	<pre class=prod>
+		<<progress-source>> = <<percentage>> | <<number>> | <<dimension>> | <<'animation-timeline'>>
+	</pre>
+
+	where:
+
+	<dl dfn-type=value dfn-for="<progress-source>, calc-interpolate(), transform-interpolate(), color-interpolate(), palette-interpolate()">
+		<dt><dfn><<percentage>></dfn>
+		<dd>
+			Represents the [=interpolation progress=] as a percentage,
+			with ''0%'' computing to zero and ''100%'' computing to 1.
+
+		<dt><dfn><<number>></dfn>
+		<dd>
+			Represents the [=interpolation progress=] as a number directly.
+
+			Note: This allows the use of the ''progress()'' notations
+			and other [=math functions=] that output a <<number>>.
+
+		<dt><dfn><<dimension>></dfn>
+		<dd>
+		   Represents the [=interpolation progress=] as a dimension,
+		   which is converted to a number as specified in [[#interpolation-normalization]].
+
+
+		Note: Using a <<dimension>> value as <<progress-source>>
+		requires at least some of the stops in the [=interpolation map=]
+		to also use <<dimension>> positions of the same type.
+		See [[#interpolation-normalization]].
+
+		<dt><dfn><<'animation-timeline'>></dfn>
+		<dd>
+			Represents the [=interpolation progress=]
+			as the progress of the specified [[web-animations-1#timelines|animation timeline]].
+			The values ''animation-timeline/none'' and ''animation-timeline/auto'' are invalid.
+			[[!CSS-ANIMATIONS-2]] [[!WEB-ANIMATIONS-2]]
+	</dl>
+
+	Note: Progress values below ''0''/''0%'' and above ''1''/''100%''
+	are unconventional, and potentially awkward, but valid.
+	For example, most [=easing functions=], though they will accept any input,
+	are defined in consideration of progress defined between the [0,1] (i.e. [0%,100%]) range.
+
+<h5 id="interpolation-progress-easing">
+Easing Interpolation Progress: the ''by <<easing-function>>'' argument</h5>
+
+	The [=interpolation progress=] given by <<progress-source>> may be optionally modified
+	by the <<easing-function>> specified after the <dfn dfn-type=value dfn-for="calc-interpolate(), transform-interpolate(), color-interpolate(), palette-interpolate(), interpolate()">by</dfn> keyword.
+	It applies the specified [=easing function=] to the “timeline” of progress as a whole
+	by modifying the [=interpolation progress=] before it's applied to the [=interpolation map=],
+	analogous to 'animation-easing'.
+
+<h4 id="interpolation-map-arguments">
+Defining the Interpolation Map</h4>
+
+	Similar to the [=gradient functions=],
+	the [=interpolation notations=] define an [=interpolation map=] using a stop list,
+	associating <dfn>input positions</dfn> with <dfn>output values</dfn>.
+	Each <dfn>interpolation stop</dfn> represents, essentially,
+	a keyframe of the [=interpolation map=]:
+	values between [=interpolation stops=] are interpolated between these adjacent keyframes
+	in accordance with the <<segment-options>> and <<easing-function>> arguments applying between those keyframes.
+
+	The [=interpolation map=] values are defined as follows:
+
+	<dl dfn-for="calc-interpolate(), transform-interpolate(), color-interpolate(), palette-interpolate(), interpolate()">
+		<dt><dfn type lt="<input-position>|<output-value>"><<input-position>>{1,2} : <<output-value>></dfn>
+		<dd>
+			Represents an [=interpolation stop=]
+			associating the specified [=input position=](s) with the specified [=output values=].
+			As with the [=gradient functions=],
+			if two <<input-position>>s are specified,
+			it is treated the same as two stops with the same <<output-value>>.
+
+		<dt><dfn value><<easing-function>></dfn>
+		<dd>
+			When appearing in the first argument,
+			specifies the “default” [=easing function=] to be used between each stop.
+			When appearing between stops,
+			specifies the [=easing function=] to be used between the two surrounding stops,
+			overriding any default provided by a global <<easing-function>> argument.
+			(It is analogous to 'animation-timing-function'.)
+
+			The [=input progress value=] to this [=easing function=]
+			is the <dfn dfn for>segment interpolation progress</dfn>--
+			how far the [=interpolation progress=] is
+			between the [=input positions=] of the nearest stops preceding and following it.
+
+			<div class=example>
+				For example, in ''color-interpolate(20%, 0%: red, ease-in-out, 80%: green, 100%: blue)'',
+				the ''20%'' [=interpolation progress=]
+				becomes a ''25%'' [=segment interpolation progress=],
+				as ''20%'' is 25% of the way between ''0%'' and ''80%'',
+				the surrounding [=input positions=].
+			</div>
+
+		<dt><dfn type><<segment-options>></dfn>
+		<dd>
+			When appearing in the first argument,
+			provides any type-specific interpolation options
+			that apply to every segment in the [=interpolation map=].
+			When appearing between stops,
+			provides any type-specific interpolation options
+			that apply to the interpolation segment between
+			the stops on either side of this argument,
+			overriding any default provided by a corresponding global <<segment-options>> argument.
+	</dl>
+
+	All positions before the first [=interpolation stop=] map to the first stop's <<output-value>>,
+	and all positions after the last [=interpolation stop=] map to the last stop's <<output-value>>.
+	In other words, the map fills outward from the first/last stop (just like gradients)--
+	it does not interpolate beyond them.
+
+<h3 id="interpolation-normalization">
+Validation and Normalization</h3>
+
+<h4 id="interpolation-validity">
+Type Checking</h4>
+
+	Each <<progress-source>> and <<input-position>> has a <dfn lt="interpolation input type">type</dfn>,
+	which can be <dfn for="interpolation input type">proportional</dfn>
+	(<<number>>, <<percentage>>, or <<'animation-timeline'>>)
+	or <dfn for="interpolation input type">absolute</dfn>
+	(all other types, and <<'animation-timeline'>>).
+	The proportional types represent progress as a percentage;
+	any mix of these types is valid.
+	The absolute types represent progress in absolute dimensions,
+	and all <<progress-source>> and <<input-position>> values that are not proportional
+	must have a [=consistent type=] for the notation to be valid.
+	Additionally, an [=interpolation notation=] whose <<progress-source>> is not proportional
+	must have at least one absolute <<input-position>>
+	(in order to define the [=interpolation range=]),
+	or else the notation is invalid.
+
+	Note: An <<'animation-timeline'>> has both a proportional type (the percentage progress)
+	as well as an absolute type (<<time>> or <<length>>).
+
+<h4 id="interpolation-range-calculation">
+Calculating the Absolute Interpolation Range</h4>
+
+	The <dfn>interpolation range</dfn> specifies the <<dimension>> values
+	corresponding to 0% and 100% [=interpolation progress=],
+	and thereby defines the mapping between proportional and absolute values.
+
+	In an absolutely typed [=interpolation map=],
+	the first and last absolute stops in the list
+	are pinned to 0% and 100%, respectively.
+	(If there is only one absolutely typed [=interpolation stop=],
+	it is pinned to both 0% and 100%.)
+
+	A proportionally typed [=interpolation map=]
+	does not define an [=interpolation range=].
+
+<h4 id=interpolation-dimension-normaolization>
+Normalizing Absolute Positions and Progress</h4>
+
+	If a <<progress-source>> or <<input-position>> is specified as a <<dimension>>,
+	it is normalized to a number
+	by linearly interpolating it between the start and end of the [=interpolation range=].
+	(This can produce values less than 0 or greater than 1.)
+
+	<div class=example>
+		For example, given a function like:
+
+		<pre highlight=css>
+			background-color: color-interpolate(300px in hsl, 200px: red, 500px: green, 600px: blue);
+		</pre>
+
+		The [=interpolation range=] is ''(200px, 600px)'',
+		so the <<progress-source>> is converted to the number ''0.25'',
+		and the three stops are converted to the numbers ''0'', ''.75'', and ''1''.
+
+		Thus, that function is equivalent to:
+
+		<pre highlight=css>
+			background-color: color-interpolate(25% in hsl, 0%: red, 75%: green, 100%: blue);
+		</pre>
+
+		In either case, the result will be a color 1/3 of the way between ''red'' and ''green''
+		using HSL interpolation,
+		giving ''hsl(40deg, 100%, 50%)'', a light orange.
+	</div>
+
+<h4 id=interpolation-stop-fixup>
+Interpolation Stop Fixup</h4>
+
+	Once all [=interpolation stops=] have been normalized,
+	they are additionally fixed up so that they progress in order
+	from the first stop to the last.
+	If any stop has an [=input position=] that is less than the [=input position=] of the preceding stop,
+	it is set to the [=input position=] of the previous stop.
+
+<h3 id=interpolation-resolution>
+Interpolation Resolution</h3>
+
+	The [=used value=] of a valid [=interpolation notation=] is
+	the result of mapping its [=interpolation progress=]
+	through the specified [=interpolation map=].
+
+	The [=computed value=] is the [=used value=] if it is possible to calculate.
 	Otherwise,
-	the [=computed value=] of ''mix()'' is
-	the ''mix()'' [=functional notation=] itself
-	with its <<progress>> value computed
-	and its <<whole-value>>s (if provided)
-	computed as values for this property.
+	if its [=interpolation progress=], [=input positions=], and interpolation options
+	can all be resolved,
+	then it is simplified to a two-stop [=interpolation notation=]
+	with <<number>> values for the [=interpolation progress=] and [=input positions=],
+	and all other values computed according to their type.
+	Otherwise,
+	it is the [=interpolation notation=] itself, with its arguments computed individually otherwise.
+
+<h3 id="calc-interpolate">
+Interpolated Numeric and Dimensional Values: the ''calc-interpolate()'' notation</h3>
+
+	The <dfn>calc-interpolate()</dfn> [=interpolation notation=]
+	represents an interpolated numeric or dimensional value.
+	Like ''calc()'', it is a [=math function=],
+	with the following syntax:
+
+	<pre class=prod>
+		<<calc-interpolate()>> = calc-interpolate(
+			[
+				<<progress-source>> && [ by <<easing-function>> ]?
+				&& <<easing-function>>?
+			] ,
+			<<input-position>>{1,2} : <<calc-sum>> ,
+			[ <<easing-function>>? , <<input-position>>{1,2} : <<calc-sum>> ]# )
+	</pre>
+
+	The <<calc-sum>> arguments can resolve
+	to any <<number>>, <<dimension>>, or <<percentage>>,
+	but must have a [=consistent type=]
+	or else the function is invalid.
+	The result's type will be the [=consistent type=],
+	[=made consistent=] with the type of the <<progress-source>> value.
+
+<h3 id="color-interpolate">
+Interpolated Color Values: the ''color-interpolate()'' notation</h3>
+
+	The <dfn>color-interpolate()</dfn> [=interpolation notation=]
+	represents an interpolated <<color>> value,
+	with the following syntax:
+
+	<pre class=prod>
+		<<color-interpolate()>> = color-interpolate(
+			[
+				<<progress-source>> && [ by <<easing-function>> ]?
+				&& <<easing-function>>? && <<color-interpolation-method>>?
+			] ,
+			<<input-position>>{1,2} : <<color>>,
+			[ [ <<easing-function>> || <<color-interpolation-method>> ],
+			  <<input-position>>{1,2} : <<color>> ]# )
+	</pre>
+
+<h3 id="transform-interpolate">
+Interpolated Transform Values: the ''transform-interpolate()'' notation</h3>
+
+	The <dfn>transform-interpolate()</dfn> [=interpolation notation=]
+	represents an interpolated <<transform-list>>,
+	with the following syntax:
+
+	<pre class=prod>
+		<<transform-interpolate()>> = transform-interpolate(
+			[
+				<<progress-source>> && [ by <<easing-function>> ]?
+				&& <<easing-function>>?
+			],
+			<<input-position>>{1,2} : <<transform-list>>,
+			[ <<easing-function>>?, <<input-position>>{1,2} : <<transform-list>> ]# )
+	</pre>
+
+	''transform-interpolate()'' is, itself, a <<transform-function>>.
+
+<h3 id="mix">
+Interpolated Property Values: the ''interpolate()'' notation</h3>
+
+	The <dfn>interpolate()</dfn> [=interpolation notation=]
+	represents the interpolation of entire property values,
+	which supports two alternative syntax patterns:
+
+	<pre class=prod>
+		<<interpolate()>> = interpolate(
+			[
+				<<progress-source>> && [ by <<easing-function>> ]?
+				&& <<easing-function>>?
+			] ,
+			<<input-position>>{1,2} : <<whole-value>>,
+			[ <<easing-function>>?, <<input-position>>{1,2} : <<whole-value>> ]# ) |
+		interpolate( <<progress-source>> && [ by <<easing-function>> ]?
+			&& <<easing-function>>?
+			of <<keyframes-name>> )
+	</pre>
+
+	The first syntax alternative, like other [=interpolation notations=],
+	assembles an [=interpolation map=] from a list of [=interpolation stops=].
+	The second uses the corresponding property declarations from a set of keyframes,
+	incorporating those values into the normal [=cascade=] for this property.
+
+	Each <<whole-value>> argument is computed as if it were the value of this property;
+	and all other arguments computed according to their type.
 
 	<div class="example">
-		For example, most uses of ''mix()''
+		For example, most uses of ''interpolate()''
 		will resolve at computed-value time:
 
 		<pre>
-			color: mix(90%, red, blue);
+			color: interpolate(90%, 0: red, 1: blue);
 			/* via simple interpolation,
 			   computes to: */
 			color: rgb(10% 0 90%);
 
-			color: mix(90%, currentcolor, black);
+			color: interpolate(90%, 0: currentcolor, 1: black);
 			/* can't be fully resolved at computed-value time,
 			   but still has a defined representation: */
 			color: color-mix(currentcolor 90%, black 10%);
 
-			float: mix(90%, left, right);
+			float: interpolate(90%, 0: left, 1: right);
 			/* discretely animatable */
 			float: right;
 		</pre>
-
-		But a few cases don't have an intermediate representation:
-
-		<pre>
-			transform: mix(90%, translate(calc(1em + 50%)), rotate(30deg));
-			/* because functions don't match, it will interpolate
-			   via matrix(). But translate(%) needs layout
-			   information to turn into a matrix(), so the
-			   interpolated value can't actually be represented.
-			   Computes to: */
-			transform: mix(90%, translate(calc(16px + 50%)), rotate(30deg));
-			transform: mix(90% of ripple);
-		</pre>
 	</div>
 
-	The ''mix()'' notation is a <<whole-value>>.
+	The ''interpolate()'' notation is a <<whole-value>>.
 	Additionally,
 	if any of its <<whole-value>> arguments are [=not animatable=],
 	the notation is invalid.
@@ -1228,16 +1378,15 @@ Interpolated Property Values: the ''mix()'' notation</h3>
 
 		<pre>
 			/* Invalid start value */
-			color: mix(90%, #invalid, #F00);
+			color: interpolate(90%, 0: #invalid, 1: #F00);
 
 			/* Function is mixed with other values */
-			background: url(ocean) mix(10%, blue, yellow);
+			background: url(ocean) interpolate(10%, 0: blue, 1: yellow);
 
 			/* 'animation-*' is not animatable */
-			animation-delay: mix(0%, 0s, 2s);
+			animation-delay: interpolate(0%, 0: 0s, 1: 2s);
 		</pre>
 	</div>
-
 
 <!-- Big Text: subs
 
@@ -1302,7 +1451,7 @@ Selecting the First Supported Value: the ''first-valid()'' notation</h3>
 	as the whole value of the property it's used in.
 
 	<pre class=prod>
-		<dfn>&lt;first-valid()></dfn> = first-valid( <<declaration-value>># )
+		<<first-valid()>> = first-valid( <<declaration-value>># )
 	</pre>
 
 	If none of the arguments represent a valid value for the property,
@@ -1322,48 +1471,92 @@ Selecting the First Supported Value: the ''first-valid()'' notation</h3>
 	unlike <<whole-value>>.
 
 <!-- Big Text: if()
+
+████ █████▌   ██ ██
+ ▐▌  █▌      █▌   ▐█
+ ▐▌  █▌     █▌     ▐█
+ ▐▌  ████   █▌     ▐█
+ ▐▌  █▌     █▌     ▐█
+ ▐▌  █▌      █▌   ▐█
+████ █▌       ██ ██
 -->
 
 <h3 id="if-notation">
 Conditional Value Selection: the ''if()'' notation</h3>
 
-	The <dfn>if()</dfn> notation is an [=arbitrary substitution function=]
+	The <dfn>if()</dfn> function is an [=arbitrary substitution function=]
 	that represents conditional values.
 	Its argument consists of an ordered semi-colon&ndash;separated list of statements,
 	each consisting of a condition
 	followed by a colon
 	followed by a value.
-	An ''if()'' notation represents
+	An ''if()'' function represents
 	the value corresponding to the first condition in its argument list to be true;
 	if no condition matches,
-	then the ''if()'' notation represents an empty token stream.
+	then the ''if()'' function represents an empty token stream.
 
-	The ''if()'' notation syntax is defined as follows:
+	The ''if()'' function's syntax is defined as follows:
 
 	<pre class=prod>
-	<dfn><<if()>></dfn> = if( [ <<if-condition>> : <<declaration-value>>? ; ]*
-	             <<if-condition>> : <<declaration-value>>? ;? )
+	<<if()>> = if( [ <<if-branch>> ; ]* <<if-branch>> ;? )
+	<dfn><<if-branch>></dfn> = <<if-condition>> : <<declaration-value>>?
 	<dfn><<if-condition>></dfn> = <<boolean-expr[ <<if-test>> ]>> | else
 	<dfn><<if-test>></dfn> =
-	  supports( [ <<supports-condition>> | <<ident>> : <<declaration-value>> ] ) |
-	  media( <<media-query>> ) |
+	  supports( [ <<ident>> : <<declaration-value>> ] | <<supports-condition>> ) |
+	  media( <<media-feature>> | <<media-condition>> ) |
 	  style( <<style-query>> )
 	</pre>
 
 	The <dfn value for="if()">else</dfn> keyword represents
 	a condition that is always true.
 
-	To <dfn export>[=resolve an arbitrary substitution function|resolve an if() function=]</dfn>,
-	return the <<declaration-value>>?
-	associated with the first <<if-condition>> that is true;
-	if none are true,
-	return nothing (an empty token stream).
+	The ''if()'' function's [=argument grammar=] is:
+
+	<pre class=prod>
+		<dfn><<if-args>></dfn> = if( [ <<if-args-branch>> ; ]* <<if-args-branch>> ;? )
+		<dfn><<if-args-branch>></dfn> = <<declaration-value>> : <<declaration-value>>?
+	</pre>
+
+	<div algorithm>
+		To <dfn export>[=replace an arbitrary substitution function|replace an if() function=]</dfn>,
+		given a list of |arguments|:
+
+		1. [=list/For each=] <<if-args-branch>> |branch| in |arguments|:
+
+			1. [=Substitute arbitrary substitution functions=] in the first <<declaration-value>> of |branch|,
+				then [=CSS/parse=] the result as an <<if-condition>>.
+				If parsing returns failure,
+				[=iteration/continue=];
+				otherwise, let the result be |condition|.
+
+			2. Evaluate |condition|.
+
+				If a <<style-query>> in |condition| tests the value of a property,
+				and [=guarded|guarding=] a [=substitution context=] &bs<<;"property", referenced-property-name&bs>>;
+				would mark it as a [=cyclic substitution context=],
+				that query evaluates to false.
+
+				<div class=example>
+					For example, in ''--foo: if(style(--foo: bar): baz);''
+					the ''style()'' query is automatically false,
+					since [=property replacement=] has already established a &bs<<;"property", "--foo"&bs>>; [=substitution context=].
+				</div>
+
+				If the result of |condition| is false,
+				[=iteration/continue=].
+
+			3. [=Substitute arbitrary substitution functions=] in the second <<declaration-value>> of |branch|,
+				and return the result.
+
+		2. Return nothing (an empty sequence of [=component values=]).
+	</div>
 
 	Note: Unlike using ''@media''/''@supports''/''@container'' rules,
 	which just ignore their contents when they're false
 	and let the cascade determine what values otherwise apply,
 	declarations with ''if()'' do not roll back the cascade if the conditions are false;
 	any fallback values must be provided inline.
+	However, see the ''revert-rule'' [=CSS-wide keyword=].
 
 <!-- Big Text: toggle()
 
@@ -1402,7 +1595,7 @@ Toggling Between Values: the ''toggle()'' notation</h3>
 	The syntax of the ''toggle()'' expression is:
 
 	<pre class=prod>
-		<dfn><<toggle()>></dfn> = toggle( <<whole-value>># )
+		<<toggle()>> = toggle( <<whole-value>># )
 	</pre>
 
 	The ''toggle()'' notation is a <<whole-value>>.
@@ -1445,11 +1638,11 @@ Toggling Between Values: the ''toggle()'' notation</h3>
 	This is similar to the ''inherit'' keyword,
 	which works even on non-inherited properties.
 
-	Note: That the [=computed value=] of a property is an abstract set of values,
+	Note: The [=computed value=] of a property is an abstract set of values,
 	not a particular serialization [[!CSS21]],
 	so comparison between computed values should always be unambiguous and have the expected result.
 	For example,
-	a Level 2 <l spec=css22>'background-position'</l> computed value
+	a Level 2 <l spec=css2>'background-position'</l> computed value
 	is just two offsets, each represented as an absolute length or a percentage,
 	so the declarations ''background-position: top center'' and ''background-position: 50% 0%''
 	produce identical computed values.
@@ -1504,7 +1697,8 @@ Inherited Value References: the ''inherit()'' notation</h3>
 	Like the ''inherit'' keyword, the <dfn>inherit()</dfn> [=functional notation=]
 	resolves to the [=computed value=] of a property on the parent.
 	Rather than resolving to the value of the same property, however,
-	it resolves to the tokenized [=computed value=]
+	it resolves to a sequence of [=component values=]
+	representing the [=computed value=]
 	of the property specified as its first argument.
 	Its second argument, if present, is used as a fallback
 	in case the first argument resolves to the [=guaranteed-invalid value=].
@@ -1513,12 +1707,40 @@ Inherited Value References: the ''inherit()'' notation</h3>
 	whose syntax is defined as:
 
 	<pre class=prod>
-		<dfn><<inherit()>></dfn> = inherit( <<custom-property-name>>, <<declaration-value>>? )
+		<<inherit()>> = inherit( <<custom-property-name>>, <<declaration-value>>? )
 	</pre>
 
-	To <dfn export>[=resolve an arbitrary substitution function|resolve an inherit() function=]</dfn>,
-	return the [=inherited value=] of the [=custom property=] specified by the first argument,
-	and (if specified) the fallback specified by the second argument.
+	The ''inherit()'' function's [=argument grammar=] is:
+
+	<pre class=prod>
+		<dfn><<inherit-args>></dfn> = inherit( <<declaration-value>>, <<declaration-value>>? )
+	</pre>
+
+	Like ''var()'', a bare comma can be used with nothing following it,
+	indicating that the second <<declaration-value>> was passed,
+	just as an empty sequence.
+
+	Note: That is, ''inherit(--foo)'' does not pass a fallback value,
+	but ''inherit(--foo,)'' does (the fallback is just empty).
+
+	<div algorithm>
+		To <dfn export>[=replace an arbitrary substitution function|replace an inherit() function=]</dfn>,
+		given a list of |arguments|:
+
+		1. [=Substitute arbitrary substitution functions=] in the first <<declaration-value>> of |arguments|,
+			then [=CSS/parse=] it as a <<custom-property-name>>.
+
+		2. If parsing returned a <<custom-property-name>>,
+			and the [=inherited value=] of that [=custom property=] on the element
+			does not contain the [=guaranteed-invalid value=],
+			return that inherited value.
+
+		3. Otherwise, if a second <<declaration-value>>? was passed in |arguments|,
+			[=substitute arbitrary substitution functions=] in that argument,
+			and return the result.
+
+		4. Otherwise, return the [=guaranteed-invalid value=].
+	</div>
 
 	Note: Future levels of CSS may allow specifying standard CSS properties in ''inherit()'';
 	however because the tokenization of [=computed values=]
@@ -1557,8 +1779,21 @@ Ian's proposal:
 		attr() = attr( <<attr-name>> <<attr-type>>? , <<declaration-value>>?)
 
 		<dfn>&lt;attr-name></dfn> = [ <<ident-token>>? '|' ]? <<ident-token>>
-		<dfn>&lt;attr-type></dfn> = <dfn function lt="type()" for="attr()">type( <<syntax>> )</dfn> | string | <<attr-unit>>
+		<dfn>&lt;attr-type></dfn> = <dfn function lt="type()" for="attr()">type( <<syntax>> )</dfn> | raw-string | <<attr-unit>>
 	</pre>
+
+	The ''attr()'' function's [=argument grammar=] is:
+
+	<pre class=prod>
+		<dfn><<attr-args>></dfn> = attr( <<declaration-value>>, <<declaration-value>>? )
+	</pre>
+
+	Like ''var()'', a bare comma can be used with nothing following it,
+	indicating that the second <<declaration-value>> was passed,
+	just as an empty sequence.
+
+	Note: That is, ''attr(foo)'' does not pass a fallback value,
+	but ''attr(foo,)'' does (the fallback is just empty).
 
 	The <dfn>&lt;attr-unit></dfn> production matches any [=identifier=]
 	that is an [=ASCII case-insensitive=] match
@@ -1614,7 +1849,7 @@ Ian's proposal:
 		Values that fail to parse as a <css>&lt;number></css>
 		trigger fallback.
 
-		If given as the <css>string</css> keyword,
+		If given as the <css>raw-string</css> keyword,
 		or omitted entirely,
 		it causes the attribute's literal value
 		to be treated as the value of a CSS string,
@@ -1637,7 +1872,7 @@ Ian's proposal:
 		if the attribute is missing
 		or fails to parse as the specified type.
 
-		If the <<syntax>> argument is omitted,
+		If the <<attr-type>> argument is omitted,
 		the fallback defaults to the empty string if omitted;
 		otherwise, it defaults to the [=guaranteed-invalid value=] if omitted.
 
@@ -1649,9 +1884,9 @@ Ian's proposal:
 
 	<div class='note'>
 		Note that the default value need not be of the type given.
-		For instance, if the type required of the attribute by the author is ''&lt;number px>'',
+		For instance, if the type required of the attribute by the author is ''&lt;length>'',
 		the default could still be <css>auto</css>,
-		like in ''width: attr(size &lt;number px>, auto);''.
+		like in ''width: attr(size &lt;length>, auto);''.
 	</div>
 
 	<div class="example">
@@ -1687,7 +1922,7 @@ Ian's proposal:
 	</div>
 
 <h4 id=attr-substitution>
-Attribute Value Substitution: the ''attr()'' notation</h4>
+Substitution</h4>
 
 	''attr()'' is an [=arbitrary substitution function=],
 	similar to ''var()'',
@@ -1697,31 +1932,50 @@ Attribute Value Substitution: the ''attr()'' notation</h4>
 	which will make its declaration [=invalid at computed-value time=].
 
 	<div algorithm>
-		To <dfn export>[=resolve an arbitrary substitution function|resolve an attr() function=]</dfn>:
+		To <dfn export>[=replace an arbitrary substitution function|replace an attr() function=]</dfn>,
+		given a list of |arguments|:
 
 		1. Let |el| be the element that the style containing the ''attr()'' function
 			is being applied to.
-			Let |attr name| be the attribute name specified in the function.
-			Let |syntax| be the <<syntax>> specified in the function,
-			or null if it was omitted.
-			Let |fallback| be the <<declaration-value>>? argument specified in the function,
-			or the [=guaranteed-invalid value=] if it was omitted.
+			Let |first arg| be the first <<declaration-value>> in |arguments|.
+			Let |second arg| be the <<declaration-value>>? passed after the comma,
+			or null if there was no comma.
 
-		2. If there is no attribute named |attr name| on |el|,
-			return the [=guaranteed-invalid value=] and |fallback|.
-			Otherwise, let |attr value| be that attribute's value.
+		2. [=Substitute arbitrary substitution functions=] in |first arg|,
+			then [=CSS/parse=] it as <css><<attr-name>> <<attr-type>>?</css>.
+			If that returns failure, jump to the last step (labeled FAILURE).
+			Otherwise, let |attr name| and |syntax| be the results of parsing
+			(with |syntax| being null if <<attr-type>> was omitted),
+			processed as specified in the definition of those arguments.
 
-		3. If |syntax| is null,
+		3. If |attr name| exists as an attribute on |el|,
+			let |attr value| be its value;
+			otherwise jump to the last step (labeled FAILURE).
+
+		4. If |syntax| is null,
 			return a CSS <<string>>
 			whose value is |attr value|.
 
 			Note: No parsing or modification of any kind is performed on the value.
 
-		4. [=Parse with a <syntax>=] |attr value|, with |syntax| and |el|.
-			Return the result and |fallback|.
+		5. [=Substitute arbitrary substitution functions=] in |attr value|,
+			with &bs<<;"attribute", |attr name|&bs>>; as the [=substitution context=],
+			then [=parse with a <syntax>=] |attr value|, with |syntax| and |el|.
+			If that succeeds, return the result;
+			otherwise, jump to the last step (labeled FAILURE).
+
+		6. <b>FAILURE:</b>
+
+			1. If |second arg| is null,
+				and |syntax| was omitted,
+				return an empty CSS <<string>>.
+
+			2. If |second arg| is null,
+				return the [=guaranteed-invalid value=].
+
+			3. [=Substitute arbitrary substitution functions=] in |second arg|,
+				and return the result.
 	</div>
-
-
 
 
 <h4 id=attr-security>
@@ -1794,70 +2048,7 @@ Security</h4>
 	''--foo: attr(foo type(&lt;number&gt;)); background-image: src(string(var(--foo)))''
 	needs to be invalid as well.
 
-
-<h4 id=attr-cycles>
-Cycles</h4>
-
-An attribute value may contain ''attr()'' functions,
-or other [=arbitrary substitution functions=],
-that are substituted during [=parse with a <syntax>=].
-This can cause cyclic dependecies,
-either by an attribute referring to itself,
-through multiple attributes referring to each other,
-or through a combination of other [=arbitrary substitution functions=]
-(e.g. ''var()'').
-
-For each element, add a node for every attribute on that element
-to the graph described in [[css-variables-1#cycles]].
-Then, for each attribute <var>attrib</var>,
-add edges as follows:
-
-* From <var>attrib</var> to any attributes referenced by ''attr()''
-	within <var>attrib</var>'s value.
-* From <var>attrib</var> to any [=custom properties=] referenced by ''var()''
-	within <var>attrib</var>'s value.
-* From any [=custom property=] that references <var>attrib</var> using ''attr()''
-	to <var>attrib</var>.
-
-An ''attr()'' referencing an attribute
-which is part of a cycle
-makes the containing [=declaration=] [=invalid at computed-value time=].
-
-<div class='example'>
-	In the following,
-	<code>width</code> is [=invalid at computed-value time=],
-	because ''attr()'' tries to substitute a value which refers to itself:
-
-	<pre class='lang-css'>
-	div {
-	  width: attr(data-foo type(*));
-	}
-	</pre>
-	<pre class='lang-html'>
-	&lt;div data-foo="attr(data-foo type(*))">&lt;/div>
-	</pre>
-
-	Note: Even if one (or both) of the ''attr()'' functions had a fallback,
-	the result would be the same.
-</div>
-
-<div class='example'>
-	Cycles can occur through [=custom properties=];
-	in the following,
-	<code>--x</code> and <code>--y</code> are both [=invalid at computed-value time=]:
-
-	<pre class='lang-css'>
-	div {
-	  --x: var(--y);
-	  --y: attr(data-foo type(*));
-	}
-	</pre>
-	<pre class='lang-html'>
-	&lt;div data-foo="var(--x)">&lt;/div>
-	</pre>
-</div>
-
-<!-- Big Text: ident() 
+<!-- Big Text: ident()
 
 ████ ████▌  █████▌ █    █▌ █████▌   ██ ██
  ▐▌  █▌  █▌ █▌     █▌   █▌   █▌    █▌   ▐█
@@ -1954,7 +2145,7 @@ Generating Random Values</h2>
 	or just to add a bit of "flair" to a page without being distracting.
 
 	The ''random()'' and ''random-item()'' functions
-	(the <dfn export for=CSS>random functions</dfn>)
+	(the <dfn export for=CSS lt="random function">random functions</dfn>)
 	allow authors to incorporate randomness into their page,
 	while keeping this randomness predictable from a design perspective,
 	letting authors decide whether a random value should be reused in several places
@@ -1977,37 +2168,29 @@ Generating a Random Numeric Value: the ''random()'' function</h3>
 	optionally limiting the possible values to a step between those limits:
 
 	<pre class=prod>
-	&lt;random()> = random( <<random-caching-options>>? , <<calc-sum>>, <<calc-sum>>, [by <<calc-sum>>]? )
+	&lt;random()> = random( <<random-value-sharing>>? , <<calc-sum>>, <<calc-sum>>, <<calc-sum>>? )
 
-	<dfn><<random-caching-options>></dfn> = <<dashed-ident>> || per-element
+	<dfn><<random-value-sharing>></dfn> = [ [ auto | <<dashed-ident>> ] || element-shared ]
+	                       | fixed <<number [0,1]>>
 	</pre>
 
+	See [[#random-evaluation]] and [[#random-caching]]
+	for details on how the function is evaluated.
 	Its arguments are:
 
 	<dl>
-		: <<random-caching-options>>
-		:: The optional <<random-caching-options>>
-			provides some control over whether a given ''random()'' function
-			resolves similarly or differently to other ''random()''s on the page.
-			See [[#random-caching]] for details.
+		: <<random-value-sharing>>
+		:: The optional <<random-value-sharing>>
+			controls which [=random functions=] in the document
+			will share a [=random base value=]
+			and which will get distinct values.
+			If <<random-value-sharing>> is omitted,
+			it behaves as ''random()/auto''.
 
-			<div class=note>
-				By default, ''random()'' resolves to a single value,
-				shared by all elements using that style,
-				and two ''random()'' functions with identical arguments
-				will resolve to the same random value.
+			See below for details on the <<random-value-sharing>> options,
+			and see [[#random-caching]] for a precise description of their behavior.
 
-				Providing a <<dashed-ident>> does nothing,
-				but can make the argument lists distinct
-				between two or more otherwise-identical ''random()'' functions,
-				so they'll generate distinct values.
-
-				The ''per-element'' keyword causes the ''random()'' function
-				to generate a different value <em>on each element</em> the function is applied to,
-				rather than resolving to a single value per usage in the stylesheet.
-			</div>
-
-		: <<calc-sum>>, <<calc-sum>>
+		: <css><<calc-sum>>, <<calc-sum>></css>
 		:: The two required [=calculations=]
 			specify the  minimum and maximum value
 			the function can resolve to.
@@ -2023,7 +2206,7 @@ Generating a Random Numeric Value: the ''random()'' function</h3>
 				it might be ''100px'', ''300px'', or any value between them like ''234.5px''.
 			</div>
 
-		: ''by <<calc-sum>>''
+		: <css><<calc-sum>>?</css>
 		:: The final optional argument
 			specifies a step value:
 			the values the function can resolve to
@@ -2033,55 +2216,240 @@ Generating a Random Numeric Value: the ''random()'' function</h3>
 			that result in an in-range value.
 
 			<div class=example>
-				For example, ''random(100px, 300px, by 50px)''
+				For example, ''random(100px, 300px, 50px)''
 				can only resolve to ''100px'', ''150px'', ''200px'', ''250px'', or ''300px'';
 				it will never return a value like ''120px''.
 
-				While the minimum value is always a possible result,
-				the maximum value isn't always,
-				if it's not also a multiple of the step from the minimum.
-				For example, in ''random(100px, 300px, by 30px)'',
-				the largest possible value it can resolve to is ''280px'',
-				6 steps from the minimum value.
-
-				Note that rounding issues might have an effect here:
-				in ''random(100px, 200px, by 100px / 3)''
-				you'll definitely get three possible values
-				(''100px'', and approximately ''133.33px'' and ''166.67px''),
-				but whether ''200px'' is possible depends on rounding precision.
-				To be safe, you can put the maximum value
-				<em>slightly above</em> where you expect the final step to land,
-				like ''random(100px, 201px, by 100px / 3)''.
+				Note that the max value might not actually show up as a possible value;
+				for example, in ''random(100px, 200px, 30px)'',
+				the possible values are ''100px'', ''130px'', ''160px'', and ''190px''.
 			</div>
+
+			Note: Even if it's <em>intended</em> that <code>min</code> and <code>max</code>
+			are exactly some integer multiple of <code>step</code> apart,
+			numeric precision issues can prevent that from being true.
+			To avoid these issues,
+			if the max value is <em>very close</em> to equalling a stepped value
+			(above or below it),
+			the max value is used as the final stepped value instead.
+			See [[#random-evaluation]] for precise details.
 
 			<div class=example>
 				As explained in the definition of ''round()'',
 				CSS has no "natural" precision for values,
 				but the step value can be used to assign one.
 
-				For example, ''random(100px, 500px, by 1px)''
+				For example, ''random(100px, 500px, 1px)''
 				restricts it to resolving only to whole px values;
-				''random(1, 10, by 1)''
+				''random(1, 10, 1)''
 				is restricted to resolving only to integers;
 				etc.
 			</div>
 
-			Note: The definition of the step <em>does not</em> allow
-			for naively generating a random value in the range
-			and then rounding it to the nearest step value,
-			as that can result in the values not appearing with the same weights.
-			For example, ''random(100px, 200px, by 50px)''
-			has to generate the three possible values each with a 1/3 chance;
-			a naive rounding-based method will instead incorrectly generate ''150px''
-			twice as often as the boundary values.
+			Note: Providing a step value <em>is not equivalent</em>
+			to generating a random value and then rounding it;
+			''random(100px, 200px, 50px)'' will generate three possible values
+			(100px, 150px, 200px)
+			all with a 1/3 chance,
+			while ''round(random(100px, 200px), 50px)''
+			will generate the same three possible values,
+			but ''150px'' will occur 1/2 the time,
+			while ''100px'' and ''200px'' will only occur 1/4 of the time each.
 	</dl>
 
-	All of the [=calculation=] arguments can resolve to any <<number>>, <<dimension>>, or <<percentage>>,
-	but must have the <em>same</em> [=determine the type of a calculation|type=], or else the function is invalid;
-	the result will have the same type as the arguments.
+	The <<random-value-sharing>> value controls sharing along two axises:
+
+	* between [=random functions=] used for different things
+		in the style for a single element,
+		via the ''random()/auto'' or ''random()/<dashed-ident>'' values
+	* between [=random functions=] used for the same thing
+		in the styles across several elements,
+		via the ''random()/element-shared'' value (or its absence)
+
+	<dl dfn-type=value dfn-for="random(),<random-value-sharing>">
+		: <dfn>auto</dfn>
+		::	Each [=random function=] in an element's styles
+			will use a distinct [=random base value=].
+			(But see <a href="#auto-naming-details">the note below</a> for a small wrinkle about this.)
+
+			If neither ''random()/auto'' nor ''random()/<dashed-ident>'' are specified,
+			it behaves as ''random()/auto''.
+
+		: <dfn><<dashed-ident>></dfn>
+		:: Each [=random function=] in an element's styles
+			with the same <<dashed-ident>>
+			will share the same [=random base value=];
+			ones with different <<dashed-ident>>s
+			will use distinct [=random base values=].
+
+		: <dfn>element-shared</dfn>
+		:: If ''random()/element-shared'' is omitted,
+			[=random functions=] on different elements
+			will use distinct [=random base values=].
+
+			If specified,
+			[=random functions=] on different elements
+			will share the same [=random base value=]
+			if they have the same <<dashed-ident>> (if specified)
+			or if they're used in the same style in the same way (if not).
+			(Again, see <a href="#auto-naming-details">the note below</a> for a small wrinkle about this.)
+
+		: <dfn lt="fixed|<number>">fixed <<number>></dfn>
+		:: If ''fixed <<number>>'' is specified,
+			the <<number>> is used as the [=random function's=] [=random base value=],
+			rather than allowing the UA to generate a [=random base value=]
+			and controlling how it's shared.
+
+			While ''1'' is technically allowed as a valid value
+			(because CSS grammars can only express closed ranges),
+			the [=random base value=] is clamped to the highest representable value
+			less than ''1'',
+			so [=random base values=] remain in the half-open range `[0, 1)`.
+
+			Note: While this <em>might</em> be useful for authors
+			to get predictable values while testing a page,
+			the reason it exists is to fix some corner cases in [=inheritance=]
+			that would otherwise cause elements to <em>not</em> share [=random base values=]
+			when authors would expect them to.
+			It is observable in some rare [=computed values=],
+			but otherwise will never show up in an element's styles.
+	</dl>
 
 	<div class=example>
-		For example, ''random(50px, 100%, by 1em)'' is valid
+		* <b>Maximum random</b>:
+			both properties get a different value,
+			and it's different per element too,
+			so you get lots of random rectangles.
+
+			<pre highlight=css>
+			.random-rect {
+				width: random(100px, 200px);
+				height: random(100px, 200px);
+			}
+			</pre>
+
+		* <b>Shared by name within an element</b>:
+			both properties get the same value,
+			but it's still different per element,
+			so you get lots of random squares.
+
+			<pre highlight=css>
+			.random-square {
+				width: random(--foo, 100px, 200px);
+				height: random(--foo, 100px, 200px);
+			}
+			</pre>
+
+		* <b>Shared between elements within a property</b>:
+			both properties get different values,
+			but they're shared by every element,
+			so you get lots of identical rectangles of a single random size.
+
+			<pre highlight=css>
+			.shared-random-rect {
+				width: random(element-shared, 100px, 200px);
+				height: random(element-shared, 100px, 200px);
+			}
+			</pre>
+
+		* <b>Shared globally</b>:
+			both properties get the same value,
+			and every element shares that value,
+			so you get lots of identical squares of a single random size.
+
+			<pre highlight=css>
+			.shared-random-squares {
+				width: random(--foo element-shared, 100px, 200px);
+				height: random(--foo element-shared, 100px, 200px);
+			}
+			</pre>
+	</div>
+
+	<details class=note id=auto-naming-details>
+		<summary>Details about how ''random()/auto'' works</summary>
+
+		Technically, the ''random()/auto'' value generates a name
+		similar to an author specifying a <<dashed-ident>>,
+		but it's auto-generated using the property the [=random function=] shows up in,
+		and its index among multiple [=random functions=] in that property.
+		For example, in ''margin: random(0px, 10px) random(0px, 10px)'',
+		the first function gets a name of "margin 0"
+		while the second gets a name of "margin 1".
+
+		This ensures that every auto-generated name on a single element is unique,
+		and thus will get their own [=random base value=].
+		It also ensures that declarations like
+		''.foo { width: random(element-shared, 100px, 200px); }''
+		will cause all the ''.foo'' elements to share a [=random base value=] for their width
+		(they all have the same auto-generated name, "width 0").
+
+		However, it also means that a few other cases can create sharing that might be unexpected.
+		For example, in the following:
+
+		<pre highlight=css>
+		.foo {
+			width: random(element-shared, 100px, 200px);
+		}
+		.bar {
+			width: random(element-shared, 200px, 300px);
+		}
+		</pre>
+
+		Both ''.foo'' and ''.bar'' elements have ''random()'' functions
+		whose auto-generated names are "width 0",
+		so they'll share the same [=random base value=]
+		and generate related random values,
+		even if they were never intended to be linked together like that.
+
+		Similarly, in the following:
+
+		<pre highlight=css>
+		.foo {
+			animation: flicker linear random(1s, 2s);
+		}
+		.foo:hover {
+			animation: glow linear random(4s, 6s);
+		}
+		</pre>
+
+		The two ''random()'' functions have the same auto-generated name "animation 0",
+		so they'll share [=random base values=] on a single element
+		and generate related random values,
+		even tho the author likely considers them to be "different uses".
+
+		This unexpected sharing is, unfortunately, unavoidable.
+		CSS generally doesn't care <em>how</em> you organize styles for your elements;
+		in particular, whether you style several elements
+		with a single style rule like ''.foo, .bar {...}'',
+		multiple style rules like ''.foo {...} .bar {...}'',
+		or by setting the <{html-global/style}> attribute on each element individually,
+		you'll get the same results.
+		This needs to continue to be true even when you're using random values,
+		so we can't distinguish random values by how they're <em>set</em>,
+		only how they're <em>used</em>.
+
+		There's no syntactic distinction in a stylesheet
+		between styling "related" elements and "independent" elements,
+		or distinguishing "independent" states,
+		so we must treat all elements as potentially related for this purpose.
+		If this is undesirable,
+		you can always supply a sufficiently unique <<dashed-ident>> yourself,
+		like ''random(--sidebar-width element-shared, ...)'' on one set of elements
+		and ''random(--card-width element-shared, ...)'' on another,
+		or ''random(--flicker, ...)'' and ''random(--glow, ...)'' on the different rules.
+
+		This is the one case where supplying a <<dashed-ident>>
+		can <em>reduce</em> the sharing of [=random base values=]
+		versus omitting it.
+	</details>
+
+	All of the [=calculation=] arguments can resolve to any value,
+	but must have a [=consistent type=]
+	or else the function is invalid;
+	the result’s type will be the consistent type.
+
+	<div class=example>
+		For example, ''random(50px, 100%, 1em)'' is valid
 		(assuming percentages are valid in the context this is used,
 		and resolve to a <<length>>),
 		as all three arguments resolve to a length.
@@ -2093,38 +2461,51 @@ Generating a Random Numeric Value: the ''random()'' function</h3>
 	A ''random()'' function can be [=simplify a calculation tree|simplified=]
 	as soon as its argument [=calculations=]
 	can be simplified to numeric values.
+	See [[#random-caching]] for details on how it's resolved.
 
-	Note: This means that ''random()'' is <em>usually</em> resolved
+	If a ''random()'' function can't be [=simplify a calculation tree|simplified=]
 	by [=computed value=] time,
-	and thus will inherit as a static numeric value.
-	However, if the argument [=calculations=] aren't resolved
-	until [=used value=] time
-	(such as if they include <<percentage>> values
-	that require layout information to resolve),
-	[=inheritance=] will transfer the ''random()'' function itself.
-	(This is no different, however, to the behavior of the <<percentage>>s themselves,
-	which would inherit as <<percentage>>s
-	and thus might resolve to different values on the child elements.)
+	then it computes to its maximally-simplified form,
+	but with its <<random-value-sharing>> set to its [=random base value=].
 
+	<div class=example>
+		For example, given the declaration ''width: random(50%, 100%)'',
+		the calculations can't be simplified at [=computed value=] time
+		because the percentages depend on [=used value=] information
+		(the size of the element's [=containing block=]).
+
+		So, the [=computed value=] of the property
+		is ''width: random(fixed .1234, 50%, 100%)''
+		(or some other random value instead of ''.1234''),
+		meaning it will eventually resolve to ''56.17%''
+		(or similar for the actual random value).
+	</div>
 
 	Issue: At least in theory it should be fine to use ''random()''
 	in non-property contexts,
-	so long as ''per-element'' isn't specified;
-	it's well-defined what happens with <code>@media (max-width: random(100px, 500px)) {...}</code>,
-	for example.
+	it would just set the "element id" of the caching key to null,
+	and, if necessary, compute an appropriate descriptor/etc-based caching key.
+	Like, <code>@media (max-width: random(100px, 500px)) {...}</code>
+	could be well-defined;
+	the caching key is just "@media max-width 1" or something.
 	I suspect we want to disallow it, tho?
+
 
 <h4 id=random-infinities>
 Argument Ranges</h4>
 
-	In ''random(A, B, by C)'',
-	if A or B is infinite,
+	In ''random(A, B)'',
+	if A is infinite,
+	the result is infinite.
+
+	If A is finite,
+	but the difference between A and B
+	is either infinite
+	or large enough to be treated as infinite in the user agent,
 	the result is NaN.
 
-	If A and B are finite,
-	but the distance between them (''B - A'')
-	is large enough to become infinite in the user agent,
-	the result is NaN.
+	In ''random(A, B, C)'',
+	the same behavior for A and B as defined above applies.
 
 	If C is infinite,
 	the result is A.
@@ -2132,9 +2513,10 @@ Argument Ranges</h4>
 	If C is negative, zero,
 	or positive but close enough to zero
 	that the range for the step multiplier
-	(the <code>N</code> mentioned in the argument's definition)
+	(the <code>N</code> mentioned in [[#random-evaluation]])
 	would be infinite in the user agent,
 	the step must be <em>ignored</em>.
+	(The function is treated as if only A and B were provided.)
 
 	Note: As usual for [=math functions=],
 	if any argument calculation is NaN,
@@ -2148,50 +2530,31 @@ Picking a Random Item From a List: the ''random-item()'' function</h3>
 	from among its list of items.
 
 	<pre class=prod>
-	&lt;random-item()> = random-item( <<random-caching-options>> , [ <<declaration-value>>? ]# )
+	&lt;random-item()> = random-item( <<random-value-sharing>> , [ <<declaration-value>>? ]# )
 	</pre>
 
-	The <em>required</em> <<random-caching-options>>
+	The ''random-item()'' function's [=argument grammar=] is:
+
+	<pre class=prod>
+		<dfn><<random-item-args>></dfn> = random-item( <<declaration-value>>, [ <<declaration-value>>? ]# )
+	</pre>
+
+	See [[#random-evaluation]] and [[#random-caching]]
+	for details on how the function is evaluated.
+
+	The <em>required</em> <<random-value-sharing>>
 	is interpreted identically to ''random()''.
 	(See [[#random-caching]] for details.)
 
-	<div class=note>
-		Like ''random()'',
-		the <<dashed-ident>> can be used to force similar ''random-item()'' functions
-		to generate distinct random values,
-		and ''per-element''
-		causes it to resolve to a distinct value on each element.
-
-		Aside from these,
-		the grouping of ''random-item()'' functions as "identical"
-		is much simpler:
-		all that matters is the number of arguments.
-
-		That is, ''random-item(--x, red, blue, green)''
-		and ''random-item(--x, 1, 2, 3)''
-		will always resolve to the same argument index:
-		either ''red'' and ''1'', or ''blue'' and ''2'', or ''green'' and ''3''.
-		This allows coordination between groups of properties
-		that all want to use a random set of values.
-
-		On the other hand, ''random-item(--x, red, blue, green)''
-		and ''random-item(--x, 1, 2, 3, 4)''
-		will have no connection to each other;
-		any of the 12 possible combinations can occur.
-	</div>
-
-	Note: The <<random-caching-options>> argument is required in ''random-item()'',
+	Note: The <<random-value-sharing>> argument is required in ''random-item()'',
 	but optional in ''random()'',
-	both for parsing reasons
+	for parsing reasons
 	(it's impossible to tell whether ''random-item(--foo, --bar, --baz)''
 	has three <<declaration-value>> arguments
-	or two and a <<random-caching-options>> argument),
-	and because accidentally associating the random generation of ''random-item()'' functions together
-	is much easier to do accidentally,
-	since only the number of arguments is used to distinguish instances.
+	or two and a <<random-value-sharing>> argument).
 
 	The remaining arguments are arbitrary sequences of CSS values.
-	The ''random-item()'' function resolves to one of these sequences,
+	The ''random-item()'' function is substituted with one of these sequences,
 	chosen uniformly at random.
 
 	The ''random-item()'' function is an [=arbitrary substitution function=],
@@ -2211,21 +2574,109 @@ Picking a Random Item From a List: the ''random-item()'' function</h3>
 			the property's value becomes the [=guaranteed-invalid value=].
 	</div>
 
-	Issue: Define [=arbitrary substitution function=],
-	probably over in Variables,
-	since we have several upcoming functions leaning on this functionality.
+	<div algorithm>
+		To <dfn export>[=replace an arbitrary substitution function|replace a random-item() function=]</dfn>,
+		given a list of |arguments|:
 
-	Issue: Since ''random-item()'' is var()-like,
-	we probably want to restrict it to only be usable in properties.
-	(This is likely something we want to apply to all such functions.)
-	Tho ''random()'' is a fundamentally different kind of value,
-	we probably want to restrict it as well,
-	for thematic consistency.
+		1. Let |value sharing| be the first <<declaration-value>> in |arguments|,
+			and |options| be a list of the remaining <<declaration-value>>? options.
+
+		2. [=Substitute arbitrary substitution functions=] in |value sharing|,
+			then [=CSS/parse=] it as <<random-value-sharing>>.
+			If parsing returns failure,
+			return the [=guaranteed-invalid value=];
+			otherwise set |value sharing| to the result.
+
+		3. Select one of the |options|,
+			as specified in [[#random-evaluation]],
+			using |value sharing|
+			as specified in [[#random-caching]],
+			and let |chosen option| be the result.
+
+		4. [=Substitute arbitrary substitution functions=]
+			in |chosen option|,
+			then return the result.
+	</div>
+
+
+<h3 algorithm=random-evaluation id=random-evaluation>
+Evaluating Random Values</h3>
+
+	Given a [=random function=] with a [=random base value=] |R|,
+	the value of the function is:
+
+	: for a ''random()'' function with |min| and |max|, but no step
+	:: Return <code>|min| + |R| * (|max| - |min|)</code>
+
+	: for a ''random()'' function with |min|, |max|, and |step|
+	::
+		* Let |epsilon| be <code>|step| / 1000</code>,
+			or the smallest representable value greater than zero
+			in the numeric type being used
+			if |epsilon| would round to zero.
+		* Let |N| be the largest integer
+			such that <code>|min| + |N| * |step|</code> is less than or equal to |max|.
+
+			If |N| produces a value that is not within |epsilon| of |max|,
+			but |N|+1 would produce a value within |epsilon| of |max|,
+			set |N| to |N|+1.
+		* Let |step index| be a [=random integer=] less than |N|+1, given |R|.
+		* Let |value| be <code>|min| + |step index| * |step|</code>.
+		* If |step index| is |N| and |value| is within |epsilon| of |max|, return |max|.
+		* Otherwise, return |value|.
+
+		<details class=note>
+			<summary>Epsilon/max Details</summary>
+
+			|epsilon| was chosen to be <code>|step| / 1000</code>
+			as a useful "middle ground" value:
+			small enough that it's very unlikely to accidentally trigger
+			when the author didn't intend it,
+			but large enough that it's guaranteed to catch floating-point precision errors.
+
+			It's size is also within the realm for authors to exploit themselves;
+			if their |max| is meant to be an integer multiple of their |step|,
+			but the |step| is not a terminating decimal,
+			as long as they write the |step| with 5 or 6 digits of precision
+			then the largest value should land within |epsilon| of |max|.
+
+			For example, while ''random(0px, 100px, 33.3px)'' will not generate a ''100px'' value
+			(the epsilon is ''.0333px'',
+			but 3 steps yields ''99.9px'',
+			which is ''.1px'' from |max|, more than the epsilon),
+			''random(0px, 100px, 33.333px)'' will
+			(the epsilon is ''.033333px'',
+			similar to the previous example,
+			but 3 steps yields ''99.999px'',
+			which is ''.001px'' from |max|, much less than the epsilon).
+			(A sufficiently large number of steps
+			could still cause enough divergence to defeat this,
+			but it works for any remotely reasonable use-case.)
+
+			Using a [=calculation=] to "exactly" represent non-terminating decimals
+			will also work, of course:
+			''random(0px, 100px, 100px / 3)''
+			is guaranteed to be able to generate a ''100px'' value,
+			as the step value will only be subject to floating-point precision errors
+			far smaller than the epsilon.
+		</details>
+
+	: for a ''random-item()'' function with |N| <<declaration-value>>? arguments:
+	::
+		* Let |index| be a [=random integer=] less than |N|, given |R|.
+		* Return the |index|'th argument (0-indexed).
+
+	<div algorithm>
+		To <dfn local-lt="random integer">generate a random integer</dfn>
+		less than some integer |limit|
+		given a [=random base value=] |R|,
+		return <css>round(down, |R| * |limit|, 1)</css>
+	</div>
 
 
 
 <h3 id=random-caching>
-Generating/Caching Random Values: the <<random-caching-options>> value</h3>
+Caching Random Values: the <<random-value-sharing>> value</h3>
 
 	In a programming language like JavaScript,
 	there's a clear temporal ordering to code,
@@ -2249,179 +2700,178 @@ Generating/Caching Random Values: the <<random-caching-options>> value</h3>
 	the ''random()'' and ''random-item()'' functions are defined to generate random values
 	under the following caching semantics:
 
-	* Each instance of ''random()'' or ''random-item()'' in a stylesheet
-		specifies a <dfn>random-caching key</dfn>.
-		Two instances of either function must resolve to <em>identical</em> values
-		if their [=random-caching keys=] are identical;
-		they must resolve to <em>distinct</em> values
-		if they're different.
+	* Each instance of a [=random function=] in styles
+		has an associated <dfn>random base value</dfn>.
 
-		("Distinct" here means generated by a fresh random operation;
-		this might coincidentally result in the same value as another random operation.)
+		If the [=random function's=] <<random-value-sharing>> is ''fixed <<number>>'',
+		the [=random base value=] is that number.
 
-	* For ''random()'',
-		the [=random-caching key=]
-		is a [=tuple=] of:
+		Otherwise, the [=random base value=] is a pseudo-random real number
+		in the range `[0, 1)`
+		(greater than or equal to 0 and less than 1),
+		generated from a uniform distribution,
+		and influenced by the function's [=random caching key=].
 
-		1. The [=used value=] of the minimum [=calculation=].
-		2. The [=used value=] of the maximum [=calculation=].
-		3. The [=used value=] of the step [=calculation=], if present,
-			or null otherwise.
-		4. The <<dashed-ident>> part of the <<random-caching-options>>, if present,
-			or null otherwise.
-		5. If ''per-element'' is specified in the <<random-caching-options>>,
-			a unique value per element or pseudo-element the function appears in.
+	* Each [=random function=] also specifies a <dfn>random caching key</dfn>.
+		Two [=random functions=] with the same [=random caching key=]
+		must also have the same [=random base value=];
+		two functions with different [=random caching keys=]
+		must have distinct [=random base values=].
+		(That is, generated by a fresh random operation;
+		randomness might of course produce the same actual value.)
 
-	* For ''random-item()'',
-		the [=random-caching key=]
-		is a [=tuple=] of:
+		It is intentionally unspecified <em>how</em> the [=random caching key=]
+		is used to achieve this.
+		It can literally cache a generated random value,
+		or be used as a seed for a PRNG,
+		etc.
 
-		1. The number of arguments to the function.
-		2. The <<dashed-ident>> part of the <<random-caching-options>>, if present,
-			or null otherwise.
-		3. If ''per-element'' is specified in the <<random-caching-options>>,
-			a unique value per element or pseudo-element the function appears in.
+	* A [=random caching key=] is a [=tuple=] of:
+		1. A [=string=] name: the value of the <<dashed-ident>>,
+			if specified in <<random-value-sharing>>;
+			or else a string of the form <code>"PROPERTY N"</code>,
+			where PROPERTY is the name of the property the [=random function=] is used in
+			(<em>before</em> shorthand expansion, if relevant),
+			and N is the index of the [=random function=]
+			among other [=random functions=] in the same property value.
 
-	The "unique value per element or pseudo-element" must have the same lifetime
-	as a JavaScript reference to the element
-	(or to the [=originating element=] + sufficient additional info to uniquely identify the pseudo-element).
-	Elements in separate documents
-	(including across refreshes of the same page,
-	which produces distinct documents with distinct elements)
-	<em>should</em> have distinct unique values.
-	(This is not strictly required,
-	to allow for pseudo-random generation of these values,
-	but uniqueness should be likely enough
-	that authors cannot depend on elements having the same values across documents.)
+		2. An element ID identifying the element the style is being applied to,
+			or null if ''random()/element-shared'' is specified in <<random-value-sharing>>.
+		3. A document ID identifying the {{Document}} the styles are from.
 
-	Additionally, the random generation method <em>should</em>
-	generate distinct values for the same operation
-	when invoked on different documents
-	(including refreshes of the same page).
+		The "element ID" and "document ID" must have the same lifetimes and equivalence
+		as a JavaScript reference to the {{Element}} or {{Document}}.
 
-	This element-unique value must be obtained at [=computed value=] time,
-	<em>before</em> inheritance,
-	so that a random function which is unresolved by inheritance time
-	(due to containing, for example, a layout-sensitive percentage)
-	does not have a different behavior on children
-	from one that resolves immediately.
+	* The [=random caching key=] and [=random base value=]
+		must be determined at [=computed value=] time,
+		before [=inheritance=],
+		so that a random function which is unresolved by inheritance time
+		(due to containing, for example, a layout-sensitive percentage)
+		does not have a different behavior on children
+		from one that resolves immediately.
 
 	<div class=example>
 		For example, in the following stylesheet:
 
 		<pre highlight=css>
 		.random-square {
-			width: random(100px, 500px);
-			height: random(100px, 500px);
+			width: random(--foo element-shared, 100px, 500px);
+			height: random(--foo element-shared, 100px, 500px);
 		}
 		</pre>
 
-		The [=random-caching keys=] for both functions are identical:
-		<code>(100px, 500px, null, null, null)</code>.
+		The [=random caching keys=] for the functions are identical--
+		both <code>("--foo", null, documentID)</code>.
 		This means that both will resolve to the exact same value,
 		guaranteeing a square element
 		with a size somewhere between ''100px'' and ''500px''.
-		Additionally, <em>every</em> ''.random-square'' element
-		will have the same size.
+		Additionally, <em>every</em> ''.random-square'' element on the page
+		will have the same size,
+		since ''element-shared'' was specified.
+		In fact, completely unrelated styles using the same ''random()'' function
+		will also end up sharing that value.
 
 		On other hand, in this stylesheet:
 
 		<pre highlight=css>
 		.random-rect {
 			width: random(100px, 500px);
-			height: random(--x, 100px, 500px);
+			height: random(100px, 500px);
 		}
 		</pre>
 
-		The [=random-caching keys=] are distinct between the two functions:
-		the function in 'width' has <code>(100px, 500px, null, null, null)</code>,
-		while the function in 'height' has <code>(100px, 500px, null, --x, null)</code>.
+		The [=random caching keys=] for the functions are distinct,
+		due to the defaulting rules:
+		<code>("width 1", elementID, documentID)</code> for the 'width' value,
+		and <code>("height 1", elementID, documentID)</code> for the 'height' value.
 
 		This means the two functions will resolve to distinct random values,
 		making it very unlikely for the element to be square.
-		However, every element matching ''.random-rect''
-		will still have the <em>same</em> random size.
-
-		Changing any aspect of the function also alters this key.
-		The following two declarations are similarly distinct,
-		resulting in the width and height having no connection to each other:
-
-		<pre highlight=css>
-		.random-rect-2 {
-			width: random(100px, 500px);
-			height: random(100px, 500px, by 50px);
-		}
-		</pre>
-
-		But so long as the [=used values=] end up identical,
-		two functions that look distinct might end up identical.
-		For example, in the following code:
-
-		<pre highlight=css>
-		.random-square-2 {
-			font-size: 16px;
-			width: random(160px, 320px);
-			height: random(10em, 20em);
-		}
-		</pre>
-
-		The two functions superficially look different,
-		but after the lengths are fully resolved
-		they end up with identical [=random-caching keys=];
-		each is <code>(160px, 320px, null, null, null)</code>,
-		so actually the widths and heights will end up always identical.
+		Also, every element using these styles
+		will be a <em>different</em> rectangle.
 	</div>
 
-	<div class=example>
-		By default, each instance of a ''random()'' function in a stylesheet
-		essentially resolves to a static value,
-		which is then shared by every element that property applies to.
-		This behavior can be changed with the ''per-element'' keyword.
-
-		For example, in:
+	<div>
+		Shorthands are recorded as part of the default [=random caching key=],
+		rather than the longhand the value gets expanded to.
+		For example:
 
 		<pre highlight=css>
-		.foo { width: random(100px, 500px); }
-		</pre>
-
-		Multiple elements matching ''.foo'' will end up with the same random width.
-
-		But in:
-
-		<pre highlight=css>
-		.foo { width: random(per-element, 100px, 500px); }
-		</pre>
-
-		Every element matching ''.foo'' will get its own <em>unique</em> width.
-
-		Note that this causes the value to be unique per element,
-		not per <em>value</em> necessarily.
-		For example, in:
-
-		<pre highlight=css>
-		.random-squares {
-			width: random(per-element, 100px, 500px);
-			height: random(per-element, 100px, 500px);
+		.same-tb-and-rl {
+			margin: random(0px, 10px) random(0px, 10px);
 		}
 		</pre>
 
-		Every element matching ''.random-squares'' will get a distinct random value,
-		but that value will be <em>the same</em> for 'width' and 'height' on a given element,
-		making the element square.
-		This is because in both properties
-		the [=random-caching key=] is <code>(100px, 500px, null, null, [unique value for the element])</code>,
-		so both functions will resolve to the same length on a single element.
+		Here, the "name" in the [=random caching keys=]
+		is <code>"margin 0"</code> for the first instance
+		and <code>"margin 1"</code> for the second.
+		After expansion, then,
+		'margin-top' and 'margin-bottom' will share the same random value,
+		and 'margin-left' and 'margin-right' will share a different random value.
 
-		This makes random values in [=custom properties=] act more predictably.
-		The preceding code could also be written as:
+		Combining shorthands with longhands will produce different caching keys:
 
 		<pre highlight=css>
-		.foo {
-			--size: random(per-element, 100px, 500px);
+		.different-tb-same-rl {
+			margin: random(0px, 10px) random(0px, 10px);
+			margin-bottom: random(0px, 10px);
+		}
+		</pre>
+
+		The 'margin-bottom' value has a [=random caching key=] "name"
+		of <code>"margin-bottom 0"</code>,
+		which is different from the 'margin-top' key of <code>"margin 0"</code>,
+		so the top and bottom margins will be different random values.
+		'margin-left' and 'margin-right' continue to share a third random value,
+		as they still share the name <code>"margin 1"</code>.
+	</div>
+
+	<div>
+		The evaluation semantics of [=custom properties=]
+		can make [=random functions=] act a little unpredictably
+		if you're not careful.
+
+		For example, in the following:
+
+		<pre highlight=css>
+		.square-or-rect {
+			--size: random(100px, 500px);
 			width: var(--size);
 			height: var(--size);
 		}
 		</pre>
+
+		If '--size' isn't a [=registered custom property=],
+		or is registered but with the universal grammar ''*'',
+		the ''random()'' function isn't evaluated
+		(or even recognized *as* a ''random()'' function)
+		in ''--size'',
+		so the default rules for an omitted <<dashed-ident>>
+		in the <<random-value-sharing>> isn't applied.
+		Instead, it's evaluated when it's substituted into 'width' and 'height',
+		so each gets a distinct [=random caching key=],
+		and this ends up defining a random <em>rectangle</em>,
+		rather than a square.
+
+		Similarly, a lack of ''random()/element-shared'' in the <<random-value-sharing>>
+		won't cause the function to determine its "element identifier"
+		until substitution actually happens,
+		which might be <em>after</em> '--size' has inherited through multiple elements,
+		so again multiple elements using ''var(--size)''
+		would end up with distinct random values
+		rather than sharing one value defined on their ancestor.
+
+		The first issue can be resolved,
+		if desired,
+		by specifying a <<dashed-ident>> explicitly,
+		rather than relying on the defaulting rules.
+
+		Both issues can be resolved
+		by instead using a [=registered custom property=]
+		with a non-universal grammar,
+		so its value is parsed and evaluated on the element it's declared on,
+		and the ''random()'' function will be resolved on the element
+		before it inherits.
 	</div>
 
 
@@ -2448,20 +2898,57 @@ Tree Counting Functions: the ''sibling-count()'' and ''sibling-index()'' notatio
 	as an <<integer>>,
 	the index of the element
 	on which the notation is used
-	among the children of its parent.
+	among its [=inclusive siblings=].
 	Like '':nth-child()'',
 	''sibling-index()'' is 1-indexed.
 
 	Note: The ''counter()'' function can provide similar abilities as ''sibling-index()'',
 	but returns a <<string>> rather than an <<integer>>.
 
-	When used on a [=pseudo-element=],
-	these both resolve as if specified
-	on its [=ultimate originating element=].
+	When used on an [=element-backed pseudo-element=] which is also a real element,
+	the tree counting functions resolve for that real element. For other pseudo
+	elements, they resolve as if they were resolved against the
+	originating element. It follows that for nested pseudo elements the resolution
+	will recursively walk the originating elements until a real element is found.
 
-	Note: Like the rest of CSS (other than [=selectors=]),
-	''sibling-count()'' and ''sibling-index()''
-	operate on the [=flat tree=].
+	A tree counting function is a [=tree-scoped reference=] where it references
+	an implicit [=tree-scoped name=] for the element it resolves against. This is
+	done to not leak tree information to an outer [=tree=]. A tree counting
+	function that is scoped to an outer [=tree=] relative to the element it
+	resolves against, will alway resolve to 0.
+
+	<div class=example>
+		Examples of how ''sibling-index()'' resolves for pseudo elements, and when the
+		rule and the element come from different [=trees=]:
+
+		<pre class=lang-css>
+		#target::before {
+			/* Based on the sibling-index() of #target */
+			width: calc(sibling-index() * 10px);
+		}
+		#target::before::marker {
+			/* Based on the sibling-index() of #target */
+			width: calc(sibling-index() * 10px);
+		}
+		::slotted(*)::before {
+			/* Based on the sibling-index() of the slotted element - outer tree */
+			width: calc(sibling-index() * 10px);
+		}
+		::part(my-part) {
+			/* 0px - inner tree */
+			width: calc(sibling-index() * 10px);
+		}
+		:host {
+			/* Based on the hosts sibling-index() - outer tree */
+			width: calc(sibling-index() * 10px);
+		}
+		</pre>
+
+	</div>
+
+	Note: These functions, to match [=selectors=] like '':nth-child()'', operate on the DOM tree,
+	rather than the [=flat tree=] like most CSS values do.
+	They may, in the future, have variants that support counting [=flat tree=] siblings.
 
 	Note: These functions may, in the future,
 	be extended to accept an ''of <<complex-real-selector-list>>'' argument,
@@ -2501,11 +2988,11 @@ Calculating With Intrinsic Sizes: the ''calc-size()'' function</h2>
 	<pre class=prod>
 	<dfn function lt="calc-size()">&lt;calc-size()></dfn> = calc-size( <<calc-size-basis>>, <<calc-sum>> )
 
-	<dfn>&lt;calc-size-basis></dfn> = [ <<intrinsic-size-keyword>> | <<calc-size()>> | any | <<calc-sum>> ]
+	<dfn>&lt;calc-size-basis></dfn> = [ <<size-keyword>> | <<calc-size()>> | any | <<calc-sum>> ]
 	</pre>
 
-	The <dfn>&lt;intrinsic-size-keyword></dfn> production
-	matches any [=intrinsic size=] keywords allowed in the context.
+	The <dfn>&lt;size-keyword></dfn> production
+	matches any sizing keywords allowed in the context.
 	For example, in 'width',
 	it matches ''width/auto'', ''width/min-content'', ''width/stretch'', etc.
 
@@ -2930,15 +3417,393 @@ Appendix A: Arbitrary Substitution Functions</h2>
 	is a [=functional notation=] that will,
 	when resolved,
 	substitute itself with other values
-	that are potentially unknowable at parse time--
-	and must therefore be parsed while resolving its [=computed value=].
+	that are unknowable at parse time.
 
-	Note: Since [=arbitrary substitution functions=] resolve at [=computed value=] time,
-	if the resulting value after substitution is invalid,
-	the property falls back (essentially) to ''unset'' behavior,
-	rather than falling back to an earlier value in the [=cascade=]
-	the way declarations invalid at parse time do.
-	See [[#invalid-substitution]].
+<h3 id=substitution>
+Substitution</h3>
+
+	Each [=arbitrary substitution function=]
+	must define how to <dfn export local-lt="replace|replacement">replace an arbitrary substitution function</dfn>
+	for itself,
+	given a list of arguments
+	and a [=/stack=] of [=substitution contexts=],
+	and likely involving further [=substitution=].
+	It must return a sequence of [=component values=]
+	(fully resolved,
+	so no further [=arbitrary substitution functions=] exist in the sequence),
+	which it will be replaced by.
+
+	<div class=note>
+		A function's [=replacement=] algorithm is called
+		with the results of [[#early-resolution|early substitution]]
+		and parsing with the function's [=argument grammar=],
+		but nothing more.
+		The algorithm will have to further [=substitute=] each argument it deals with,
+		before [=CSS/parsing=] it as the appropriate part of its <em>normal</em> grammar,
+		and then performing whatever logic it needs.
+
+		It might leave some arguments completely unsubstituted
+		(for example, the fallback argument of an ''attr()'' function,
+		if the attribute value exists and correctly parses),
+		or only parse some arguments based on the results of evaluating other arguments
+		(for example, later <<if-condition>> values in an ''if()'' function
+		are only evaluated if earlier ones evaluated as false,
+		and only the result in the "successful" <<if-branch>> is evaluated).
+	</div>
+
+
+	<div algorithm>
+		To <dfn export local-lt="substitute|substitution" lt="substitute arbitrary substitution function|arbitrary substitution">substitute arbitrary substitution functions</dfn>
+			in a sequence of [=component values=] |values|,
+			given an optional [=substitution context=] |context|:
+
+		1. [=Guard=] |context| for the remainder of this algorithm.
+			If |context| is marked as a [=cyclic substitution context=],
+			return the [=guaranteed-invalid value=].
+
+		2. [=list/For each=] [=arbitrary substitution function=] |func| in |values|
+			(ordered via a depth-first pre-order traversal)
+			that is not nested in the contents of another [=arbitrary substitution function=]:
+
+			1. [=Substitute early-invoked functions=] in |func|'s contents,
+				and let |early result| be the result.
+
+			2. If |early result| contains the [=guaranteed-invalid value=],
+				replace |func| in |values| with the [=guaranteed-invalid value=]
+				and [=iteration/continue=].
+
+			3. [=CSS/Parse=] |early result| according to |func|'s [=argument grammar=].
+				If this returns failure,
+				replace |func| in values with the [=guaranteed-invalid value=]
+				and [=iteration/continue=];
+				otherwise,
+				let |arguments| be the result.
+
+			3. [=Replace an arbitrary substitution function=] for |func|,
+				given |arguments|,
+				as defined by that function.
+				Let |result| be the returned list of [=component values=].
+
+			4. If |result| contains the [=guaranteed-invalid value=],
+				replace |func| in |values| with the [=guaranteed-invalid value=].
+				Otherwise, replace |func| in |values| with |result|.
+
+		3. If |context| is marked as a [=cyclic substitution context=],
+			return the [=guaranteed-invalid value=].
+			<span class=note>Nested [=arbitrary substitution functions=]
+				may have marked |context| as [=cyclic substitution context|cyclic=]
+				in step 2.</span>
+		4. Return |values|.
+	</div>
+
+	<div algorithm>
+		A <dfn export>substitution context</dfn>
+		is a [=/list=] consisting of:
+		the dependency type, as a string;
+		one or more additional values, specific to the dependency type.
+		(Usually, just one additional string.)
+
+		As [=arbitrary substitution functions=] are [=resolved=]
+		they accumulate [=substitution contexts=]
+		which affect how <em>nested</em> [=arbitrary substitution functions=] resolve.
+
+		<div class=example>
+			For example, while resolving a ''var(--foo)'' function,
+			the value of the ''--foo'' property is fetched and [=substituted=],
+			with a [=substitution context=] of <code>&bs<<;"property", "--foo"&bs>>;</code>,
+			preventing any nested [=arbitrary substitution functions=]
+			from cyclicly depending on ''--foo'' as well.
+
+			While resolving an ''attr(foo)'' function,
+			the value of the ''foo'' attribute on the element is fetched and [=substituted=],
+			with a [=substitution context=] of <code>&bs<<;"attribute", "foo"&bs>>;</code>,
+			preventing any nested functions
+			from cyclicly depending on the ''foo'' attribute as well.
+		</div>
+
+		The types of [=substitution contexts=] are currently:
+		* "property", followed by a property name,
+			and optionally a [=custom function=].
+		* "attribute", followed by an attribute name.
+		* "function", followed by a [=custom function=].
+	</div>
+
+	<div>
+
+		As [=substitution=] is recursively invoked
+		by nested [=arbitrary substitution functions=] being [=replaced=],
+		[=guarded|guards=] "stack up" the [=substitution contexts=] passed to each invocation.
+
+		When a [=substitution context=] is <dfn export>guarded</dfn>,
+		it means that, for the duration of the guard,
+		an attempt to guard a matching [=substitution context=] again
+		will mark all [=substitution contexts=] involved in the cycle as
+		<dfn export>cyclic substitution contexts</dfn>.
+
+		<div class=example>
+			For example, given the following style:
+
+			<pre highlight=css>
+			.foo {
+				--one: var(--two);
+				--two: var(--one);
+			}
+			</pre>
+
+			[=Property replacement=] for '--one'
+			invokes [=substitution=] with a [=substitution context=] of &bs<<;"property", "--one"&bs>>;.
+			[=Substitution=] sees the ''var(--two)'' function
+			and invokes [=replace a var() function=],
+			which fetches the values of '--two' and [=substitutes=] again,
+			this time with a [=substitution context=] of &bs<<;"property", "--two"&bs>>;.
+			That [=substitution=] sees the ''var(--one)'' function
+			and invokes [=replace a var() function=],
+			which fetches the value of '--one' and [=substitutes=] again,
+			with a [=substitution context=] of &bs<<;"property", "--one"&bs>>;.
+
+			This, finally, is a [=cyclic substitution context=],
+			since it matches the [=substitution context=] from the first [=substitution=],
+			causing the [=substitution=] to just produce the [=guaranteed-invalid value=].
+			This percolates back up the nested invocations,
+			eventually resulting in '--one' becoming [=invalid at computed-value time=].
+			The same happens, in opposite order,
+			when performing [=property replacement=] on '--two'.
+		</div>
+
+		<div class=example>
+			When a cycle is [=detect cyclic substitutions|detected=],
+			all participants in the cycle become invalid.
+			For example,
+			all of the following declarations
+			become [=invalid at computed-value time=].
+
+			<pre highlight=css>
+			.foo {
+				--one: var(--two);
+				--two: var(--three, baz);
+				--three: var(--one);
+			}
+			</pre>
+
+			The presence of a fallback in <code>var(--three, baz)</code>
+			does not affect the outcome.
+		</div>
+	</div>
+
+
+
+<!-- Big Text: early
+
+█████▌  ███▌  ████▌  █▌    █   ▐▌
+█▌     ▐█ ▐█  █▌  █▌ █▌    ▐▌  █
+█▌     █▌  █▌ █▌  █▌ █▌     █ ▐▌
+████   █▌  █▌ ████▌  █▌     ▐▌█
+█▌     █████▌ █▌▐█   █▌      █▌
+█▌     █▌  █▌ █▌ ▐█  █▌      █▌
+█████▌ █▌  █▌ █▌  █▌ █████   █▌
+-->
+
+<h3 id=early-resolution>
+Argument Grammars and Spread Syntax</h3>
+
+	Each [=arbitrary substitution function=],
+	in addition to its standard grammar,
+	must define an <dfn export>argument grammar</dfn>:
+	a much less specific and less restrictive version of its normal grammar,
+	which serves solely to separate the function's contents
+	into distinct arguments.
+
+	Note: Typically, an [=argument grammar=] will only consist of some punctuation
+	(usually commas)
+	and the <<declaration-value>> production.
+	See the ''if()'' function for an example.
+
+	Each function, in its [=replacement=] algorithm,
+	will apply [=substitution=] to its arguments
+	and then [=CSS/parse=] them
+	according to the appropriate parts of its standard grammar.
+	As it is in control of this process, however,
+	some arguments can be left unresolved and unparsed.
+
+	<div class=example>
+		For example, the ''if()'' function's [=argument grammar=]
+		merely divides its value into alternating "test" and "result" arguments,
+		separated by `:` and `;`.
+		It then evaluates tests one by one,
+		and only evaluates a single argument
+		matching the first successful test.
+
+		This allows ''if()'' to achieve behavior similar to `if` constructs
+		in other programming languages,
+		where later "branches" aren't evaluated at all
+		(beyond a basic parse)
+		and thus can't cause errors in cases that would be caught by earlier branches.
+
+		This means the following is a valid declaration
+		when the viewport is ''600px'' or wider,
+		resulting in the value ''blue''.
+		Only when the viewport is narrower than ''600px''
+		does the ''if()'' trigger cyclic behavior
+		and cause ''--color'' to be [=invalid at computed-value time=].
+
+		<pre highlight=css>
+		.foo {
+			--color: if(media(width >= 600px): blue; else: var(--color));
+		}
+		</pre>
+	</div>
+
+	This also means that, ordinarily,
+	parsing according to a function's [=argument grammar=]
+	<em>does not</em> see the results of any nested [=arbitrary substitution functions=];
+	the contents are divided into arguments
+	based only on the values literally present inside the function.
+
+	<div class=example>
+		For example, in ''random-item(auto, var(--foo), var(--bar))'',
+		the ''random-item()'' function selects between two random values,
+		either the result of ''var(--foo)'' or ''var(--bar)''.
+		This is true even if one of them contains commas, like:
+
+		<pre highlight=css>
+		.random-fonts {
+			--foo: Courier, monospace;
+			--bar: Arial, serif;
+			font-family: random-item(auto, var(--foo), var(--bar));
+			/* equivalent to: */
+			font-family: random-item(auto, {Courier, monospace}, {Arial, serif});
+
+			/* and thus, randomly, equivalent to either */
+			font-family: Courier, monospace;
+			/* or */
+			font-family: Arial, serif;
+		}
+		</pre>
+
+		This behavior ensures that authors don't have to defensively wrap
+		any arguments containing [=arbitrary substitution functions=]
+		in ''{}'' characters;
+		what you see is what you get.
+	</div>
+
+	Note: This is different from the behavior of [=arbitrary substitution functions=]
+	substituted into "normal" functions or properties.
+	For example, ''--colors: red, blue, green; background: linear-gradient(var(--colors));''
+	works in the expected fashion,
+	producing a gradient with three color stops,
+	because normal functions don't do this separate [=argument grammar=] parse.
+
+	This behavior can be worked around
+	by immediately preceding an [=arbitrary substitution function=]
+	with the <dfn export>spread syntax</dfn> ''...'',
+	indicating that it must be resolved "early",
+	before division into arguments.
+
+	<div class=example>
+		For example, the following <strong>will not work</strong>:
+
+		<pre highlight=css>
+		.invalid-if {
+			--if-clause: media(width >= 600px): blue;
+			color: if(var(--if-clause); else: green;);
+		}
+		</pre>
+
+		The ''if()'' function entirely fails to parse
+		according to its [=argument grammar=]:
+		there's no `:` character separating the test from the value in the first branch.
+
+		To get the desired behavior of "spreading" the variable
+		into the function's arguments,
+		use ''...''':
+
+		<pre highlight=css>
+		.valid-if {
+			--if-clause: media(width >= 600px): blue;
+			color: if(...var(--if-clause); else: green;);
+		}
+		</pre>
+	</div>
+
+	The [=spread syntax=] is three distinct <<delim-token>>s with the value `"."`,
+	all of which must not contain any whitespace between them,
+	or between the group and the subsequent [=arbitrary substitution function=].
+
+	<div class=example>
+		That is, ''...var(--foo)'' is a valid use of the [=spread syntax=],
+		but ''... var(--foo)'' is not,
+		nor is ''. . .var(--foo)''.
+
+		The latter usages will result in the [=arbitrary substitution function=]
+		being evaluated at the normal time,
+		<em>after</em> the [=argument grammar=] has been applied,
+		and the period characters being part of the function's value.
+	</div>
+
+	Note: The [=spread syntax=] is only used
+	<em>within</em> an [=arbitrary substitution function's=] value,
+	as it's only referenced by the [=substitution=] algorithm
+	when parsing an [=arbitrary substitution function=].
+	Using it outside of that,
+	such as in ''width: ...var(--sidebar-width);'',
+	is not recognized as an early invocation;
+	instead, the periods are just part of the property's value,
+	unrelated to the ''var()'' function,
+	and would in this case make the 'width' property invalid.
+	(This is similar to JavaScript,
+	where this syntax was borrowed from,
+	where `[1, ...arr, 5]` is valid,
+	but `var x = ...arr;` is not.)
+
+	<div algorithm>
+		To <dfn export>substitute early-invoked functions</dfn>
+		in a sequence of [=component values=] |values|:
+
+		1.  [=list/For each=] [=arbitrary substitution function=] |func| in |values|
+			(ordered via a depth-first pre-order traversal)
+			using the [=spread syntax=]
+			that is not nested in the contents of another [=arbitrary substitution function=]:
+
+			1. [=Substitute early-invoked functions=] in |func|'s contents,
+				and let |early result| be the result.
+
+			2. If |early result| contains the [=guaranteed-invalid value=],
+				replace |func| in |values| with the [=guaranteed-invalid value=]
+				and [=iteration/continue=].
+
+			3. [=CSS/Parse=] |early result| acccording to |func|'s [=argument grammar=].
+				If this returns failure,
+				replace |func| in values with the [=guaranteed-invalid value=]
+				and [=iteration/continue=];
+				otherwise,
+				let |arguments| be the result.
+
+			1. [=Replace an arbitrary substitution function=] for |func|,
+				given |arguments|,
+				as defined by that function.
+				Let |result| be the returned list of [=component values=].
+
+			2. If |result| contains the [=guaranteed-invalid value=],
+				replace |func| in |values| with the [=guaranteed-invalid value=].
+				Otherwise, replace |func| in |values| with |result|.
+
+		2. Return |values|.
+	</div>
+
+
+<!-- Big Text: props
+
+████▌  ████▌   ███▌  ████▌   ███▌
+█▌  █▌ █▌  █▌ █▌  █▌ █▌  █▌ █▌  █▌
+█▌  █▌ █▌  █▌ █▌  █▌ █▌  █▌ █▌
+████▌  ████▌  █▌  █▌ ████▌   ███▌
+█▌     █▌▐█   █▌  █▌ █▌         █▌
+█▌     █▌ ▐█  █▌  █▌ █▌     █▌  █▌
+█▌     █▌  █▌  ███▌  █▌      ███▌
+-->
+
+<h3 id=resolve-property>
+Resolving in Properties</h3>
 
 	Unless otherwise specified,
 	[=arbitrary substitution functions=] can be used
@@ -2983,9 +3848,16 @@ Appendix A: Arbitrary Substitution Functions</h2>
 	during style [=computed value|computation=],
 	before any other value transformations or introspection can occur.
 	If a property,
-	after [=substitution=],
+	after [=property replacement=],
 	does not match its declared grammar,
 	the declaration is [=invalid at computed-value time=].
+
+	Note: Since [=arbitrary substitution functions=] resolve at [=computed value=] time,
+	if the resulting value after substitution is invalid,
+	the property falls back (essentially) to ''unset'' behavior,
+	rather than falling back to an earlier value in the [=cascade=]
+	the way declarations invalid at parse time do.
+	See [[#invalid-substitution]].
 
 	<wpt pathprefix="css/css-variables">
 	variable-declaration-16.html
@@ -2998,7 +3870,7 @@ Appendix A: Arbitrary Substitution Functions</h2>
 	</wpt>
 
 	If a property value,
-	after [=substitution=],
+	after [=property replacement=],
 	contains only a single [=CSS-wide keyword=]
 	(and possibly whitespace/comments),
 	its value is determined as if that keyword were its [=specified value=] all along.
@@ -3052,50 +3924,23 @@ Appendix A: Arbitrary Substitution Functions</h2>
 		as it would if there were no fallback.
 	</div>
 
-	Each [=arbitrary substitution function=]
-	must define how to <dfn export>resolve an arbitrary substitution function</dfn>
-	for itself,
-	returning optional |result| and |fallback| values.
-	The |result| is used to replace the function
-	as long as it does not contain the [=guaranteed-invalid value=];
-	the |fallback| is used otherwise.
-	(The |fallback| does not need to be resolved in any way;
-	[=substitution=] will handle that if it's actually used.)
-
-	Note: See, for example, [=resolve a var() function=].
-
 	<div algorithm>
-		To <dfn export local-lt="substitute|substitution" lt="substitute arbitrary substitution function|arbitrary substitution">substitute arbitrary substitution functions</dfn> in a |value|:
+		To <dfn export lt="property replacement|replace substitution functions|replace substitution functions in a property">replace substitution functions in a property</dfn> |prop|:
 
-		1. [=list/For each=] [=arbitrary substitution function=] |func|
-			in |value|:
+		1. [=Substitute arbitrary substitution functions=] in |prop|'s value,
+			given &bs<<;"property", |prop|'s name&bs>>; as the [=substitution context=].
+			Let |result| be the returned [=component value=] sequence.
 
-			1. [=Resolve=] |func|.
-				Let |result| be the returned result,
-				and |fallback| be the returned fallback.
+		2. If |result| contains the [=guaranteed-invalid value=],
+			|prop| is [=invalid at computed-value time=];
+			return.
 
-				If no |result| was returned,
-				set |result| to the [=guaranteed-invalid value=].
-				If no |fallback| was returned,
-				set |fallback| to the [=guaranteed-invalid value=].
+		3. [=CSS/Parse=] |result| according to |prop|'s grammar.
+			If this returns failure,
+			|prop| is [=invalid at computed-value time=];
+			return.
 
-			2. <dl class=switch>
-					: If |result| does not contain the [=guaranteed-invalid value=]
-					:: Replace |func| in |value| with |result|.
-					: Otherwise, if |fallback| does not contain the [=guaranteed-invalid value=]
-					:: Replace |func| in |value| with |fallback|.
-					: Otherwise
-					:: Replace all of |value| with the [=guaranteed-invalid value=].
-						Exit this algorithm.
-				</dl>
-
-		2. If there are still [=arbitrary substitution functions=]
-			in |value| (due to substitution),
-			repeat the previous step.
-
-		3. Grammar-check |value| according to its context as normal.
-			If it is not valid at this point,
-			replace |value| with the [=guaranteed-invalid value=].
+		3. Otherwise, replace |prop|'s value with the parsed result.
 	</div>
 
 	<wpt pathprefix="css/css-variables">
@@ -3196,7 +4041,7 @@ Appendix A: Arbitrary Substitution Functions</h2>
 <h3 id=invalid-substitution oldids='invalid-variables'>
 Invalid Substitution</h3>
 
-	When [=substitution=] results in a property's value
+	When [=property replacement=] results in a property's value
 	containing the [=guaranteed-invalid value=],
 	this makes the declaration <dfn export>invalid at computed-value time</dfn>.
 	When this happens,
@@ -3457,35 +4302,14 @@ Acknowledgments</h2>
 <h2 class="no-num" id="changes">
 Changes</h2>
 
-	Changes since the <a href="https://www.w3.org/TR/2024/WD-css-values-5-20240917/">17 September 2024 Working Draft</a>:
+<h3 class=no-num id="changes-recent">
+Recent Changes</h3>
 
-	* Changed the “comma-upgrading” behavior of allowing semicolons
-		to “comma-wrapping” using braces.
-		(<a href="https://github.com/w3c/csswg-drafts/issues/9539">Issue 9539</a>)
-	* Added ''if()''.
-		(<a href="https://github.com/w3c/csswg-drafts/issues/10064">Issue 10064</a>,
-		 <a href="https://github.com/w3c/csswg-drafts/issues/5009#issuecomment-2442787271">Issue 5009</a>)
-	* Added ''inherit()''.
-		(<a href="https://github.com/w3c/csswg-drafts/issues/2864">Issue 2864</a>)
-	* Redesigned ''attr()''.
-		(<a href="https://github.com/w3c/csswg-drafts/issues/10437">Issue 10437</a>,
-		 <a href="https://github.com/w3c/csswg-drafts/issues/5092">Issue 5092</a>,
-		 <a href="https://github.com/w3c/csswg-drafts/issues/5136">Issue 5136</a>)
-	* Changed ''*progress()'' functions to use commas for argument separation,
-		for consistency with ''*mix()'' and ''clamp()''.
-		(<a href="https://github.com/w3c/csswg-drafts/issues/10489">Issue 10489</a>)
-	* Defined new <<boolean-expr[]>> multipler for the [=value definition syntax=].
-		(<a href="https://github.com/w3c/csswg-drafts/issues/10457">Issue 10457</a>)
-	* Imported definition of [=arbitrary substitution function=] from [[CSS-VARIABLES-1]].
-		(<a href="https://github.com/w3c/csswg-drafts/issues/10679">Issue 10679</a>)
-	* Imported the <<syntax>> production from [[css-properties-values-api-1]] (for use in ''attr()'').
-	* Corrected errors in the syntax of ''media-progress()'' and ''container-progress()''.
+	Changes since the <a href="https://www.w3.org/TR/2024/WD-css-values-5-20241111/">11 November 2024 Working Draft</a>:
+	* Dropped ''media-progess()'' and ''container-progress()'' in favor of using relevant units in ''progress()''.
+		(<a href="https://github.com/w3c/csswg-drafts/issues/11826">Issue 11826</a>)
 
-	Changes since the <a href="https://www.w3.org/TR/2024/WD-css-values-5-20240913/">First Public Working Draft</a> include:
-
-	* Incorporated the definition of <<position>>,
-		extending it to handle [=flow-relative=] positions.
-		(<a href="https://github.com/w3c/csswg-drafts/issues/549#issuecomment-1823607623">Issue 549</a>)
+	See also <a href="https://www.w3.org/TR/2024/WD-css-values-5-20241111/#changes">earlier changes</a>.
 
 <h3 class=no-num id="additions-L4">
 Additions Since Level 4</h3>

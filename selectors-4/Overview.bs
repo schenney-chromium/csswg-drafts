@@ -2053,6 +2053,9 @@ The Language Pseudo-class: '':lang()''</h3>
 	The <a>language range</a> does not need to be a valid language code to
 	perform this comparison.
 
+	For this purpose, a wildcard [=language range=] (<code>"*"</code>)
+	does not match elements whose language is not tagged (e.g. <code>lang=""</code>),
+	but does match elements whose language is tagged as undetermined (<code>lang=und</code>).
 	A [=language range=] consisting of an empty string
 	('':lang("")'')
 	matches (only) elements whose language is not tagged.
@@ -2968,7 +2971,7 @@ The User-interaction Pseudo-classes: '':user-valid'' and '':user-invalid''</h4>
 <h2 id="structural-pseudos">
 Tree-Structural pseudo-classes</h2>
 
-	Selectors introduces the concept of <dfn id="structural-pseudo-classes">structural pseudo-classes</dfn>
+	Selectors introduces the concept of <dfn export id="structural-pseudo-classes">structural pseudo-classes</dfn>
 	to permit selection based on extra information that lies in
 	the document tree but cannot be represented by other simple selectors or
 	combinators.
@@ -3726,11 +3729,11 @@ Grammar</h2>
 	<dfn noexport>&lt;attr-matcher></dfn> = [ '~' | '|' | '^' | '$' | '*' ]? '='
 	<dfn noexport>&lt;attr-modifier></dfn> = i | s
 
-	<dfn>&lt;pseudo-class-selector></dfn> = ':' <<ident-token>> |
-	                          ':' <<function-token>> <<any-value>> ')'
+	<dfn>&lt;pseudo-class-selector></dfn> = : <<ident-token>> |
+	                          : <<function-token>> <<any-value>> )
 
-	<dfn>&lt;pseudo-element-selector></dfn> = ':' <<pseudo-class-selector>> | <<legacy-pseudo-element-selector>>
-	<dfn>&lt;legacy-pseudo-element-selector></dfn> =  ':' [before | after | first-line | first-letter]
+	<dfn>&lt;pseudo-element-selector></dfn> = : <<pseudo-class-selector>> | <<legacy-pseudo-element-selector>>
+	<dfn>&lt;legacy-pseudo-element-selector></dfn> =  : [before | after | first-line | first-letter]
 	</pre>
 
 	In interpreting the above grammar,

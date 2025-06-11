@@ -48,6 +48,7 @@ Tiling Images: the 'background-repeat-x', 'background-repeat-y', 'background-rep
 		Percentages: N/A
 		Computed value: as specified
 		Animation type: discrete
+		Logical property group: background-repeat
 	</pre>
 
 	<pre class="prod">

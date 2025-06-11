@@ -319,7 +319,7 @@ Inheritance and the ''::first-line'' Pseudo-element</h4>
 
 
 <h3 id="first-letter-pseudo">
-First-Letter Text: ''::first-letter'' pseudo-element and its ''::prefix'' and ''::postfix'' children</h3>
+First-Letter Text: ''::first-letter'' pseudo-element and its ''::prefix'' and ''::suffix'' children</h3>
 
   <wpt>
     first-letter-001.html
@@ -393,9 +393,9 @@ First-Letter Text: ''::first-letter'' pseudo-element and its ''::prefix'' and ''
   [=sub-pseudo-element=] of the ''::first-letter'' [=pseudo-element=]
   (''::first-letter::prefix'');
   and associated following punctuation
-  is represented by the <dfn for="::first-letter">::postfix</dfn>
+  is represented by the <dfn for="::first-letter">::suffix</dfn>
   [=sub-pseudo-element=] of the ''::first-letter'' [=pseudo-element=]
-  (''::first-letter::postfix'').
+  (''::first-letter::suffix'').
   See [[#first-letter-pattern]], below.
 
 <h4 id="first-letter-pattern">
@@ -421,34 +421,39 @@ First Letters and Associated Punctuation</h4>
     <li>
       All punctuation--
       i.e, characters that belong to the Punctuation (<code>P*</code>) <a>Unicode general category</a> [[!UAX44]]--
-      that precedes the [=first letter=].
+      that precedes the [=first letter=],
+      as well as any intervening typographic space--
+      characters belonging to the <code>Zs</code> Unicode general category [[!UAX44]]
+      <em>other than</em>
+      U+3000 IDEOGRAPHIC SPACE.
     <li>
       Any punctuation other than opening punctuation and dashes--
       i.e. characters that belong to the Punctuation (<code>P*</code>) <a>Unicode general category</a>,
       excluding Open Punctuation (<code>Ps</code>)
       and Dash Punctuation (<code>Pd</code>)--
-      that follows the [=first letter=].
-    <li>
-      Any intervening typographic space--
-      i.e. characters that belong to the <code>Zs</code> Unicode general category [[!UAX44]]
+      that follows the [=first letter=],
+      as well as any intervening typographic space--
+      characters belonging to the <code>Zs</code> Unicode general category [[!UAX44]]
       <em>other than</em>
-      U+3000 IDEOGRAPHIC SPACE or
-      any <a spec=css-text-3>word-separator characters</a>
+      U+3000 IDEOGRAPHIC SPACE or a [=word separator=].
   </ul>
 
   <div class="note">
-    Informally represented, the [=first-letter text=]’s pattern here
+    Informally, the [=first-letter text=]’s pattern here
     can be roughly
-    (ignoring the exclusion of word separators from <code>Zs</code>)
-    represented as
+    (ignoring the exclusions from <code>Zs</code>)
+    represented as a “regular expression”
     <code highlight="bnf" style="font-family: inherit">
-    (P (Zs|P)*)? (L\|N\|S) ((Zs|P−(Ps|Pd))* (P−(Ps|Pd))?</code>
+    (P (Zs|P)*)? (L&#x7c;N|S) ((Zs|P−(Ps|Pd))* (P−(Ps|Pd))?</code>--
     or, alternatively,
     <code highlight="bnf" style="font-family: inherit">
-    (&#91;P] [Zs P]*)? [L N S] ([Zs [P--[Ps Pd]]]* [P--[Ps Pd]])?</code>
+    (&#91;P] [Zs P]*)? [L N S] ([Zs [P--[Ps Pd]]]* [P--[Ps Pd]])?</code>--
+    where the Unicode category abbreviation represents the set
+    of all [=typographic character units=] belonging to that category.
+
     <!-- this is not actually BNF, but it highlights better that way -->
 
-   <!-- Bikeshed is <a href="https://github.com/tabatkins/bikeshed/issues/2202">eating punctuation</a> in this note (unless escaped with undocumented escape sequences), which is not helpful. -->
+    <!-- Bikeshed is <a href="https://github.com/tabatkins/bikeshed/issues/2202">eating punctuation</a> in this note (unless escaped with undocumented escape sequences), which is not helpful. -->
 
     <pre class=railroad>
       Optional:
@@ -558,7 +563,7 @@ Inheritance and Box Tree Structure of the First-Letter Pseudo-elements</h4>
     </pre>
   </div>
 
-  If any ''::first-letter::prefix'' or ''::first-letter::postfix'' [=pseudo-elements=] exist,
+  If any ''::first-letter::prefix'' or ''::first-letter::suffix'' [=pseudo-elements=] exist,
   they are nested within the innermost ''::first-letter'',
   and otherwise interpreted similar to ''::first-letter'' itself.
 
@@ -588,7 +593,7 @@ Inheritance and Box Tree Structure of the First-Letter Pseudo-elements</h4>
   are not all in the same element
   (as the <code>‘T</code> in <code class="lang-css">&lt;p&gt;‘&lt;em&gt;T...</code>),
   the user agent may create the ''::first-letter'' pseudo-element
-  (and its ''::prefix'' or ''::postfix'' sub-elements, if any)
+  (and its ''::prefix'' or ''::suffix'' sub-elements, if any)
   from one of the elements, or all elements,
   or simply not create the pseudo-element(s).
   Additionally, if the [=first-letter text=]
@@ -606,10 +611,10 @@ Inheritance and Box Tree Structure of the First-Letter Pseudo-elements</h4>
 Styling the First-Letter Pseudo-elements</h4>
 
   In CSS a ''::first-letter'' [=pseudo-element=]
-  (and its ''::prefix'' and ''::postfix'' sub-elements)
+  (and its ''::prefix'' and ''::suffix'' sub-elements)
   is similar to an [=inline box=].
   The following properties apply to
-  ''::first-letter'', ''::first-letter::prefix'', and ''::first-letter::postfix''
+  ''::first-letter'', ''::first-letter::prefix'', and ''::first-letter::suffix''
   pseudo-elements:
 
   <ul>
@@ -751,7 +756,13 @@ Selecting Highlighted Content: the ''::selection'', ''::search-text'', ''::targe
        expressible with the [=highlight pseudo-elements=],
        this pseudo-element is optional to implement.
 
-       Issue(10527): How to identify the current match?
+       The '':current'' [=pseudo-class=] (but not ''::current()'')
+       may be combined with ''::search-text''
+       to represent the currently focused match instance.
+       The '':past'' and '':future'' [=pseudo-classes=] are reserved
+       for analogous use in the future.
+       Any unsupported combination of these pseudo-classes with ''::search-text''
+       <em>must</em> be treated as invalid.
 
     <dt><dfn>::target-text</dfn>
     <dd>
@@ -815,45 +826,6 @@ Selecting Highlighted Content: the ''::selection'', ''::search-text'', ''::targe
       identified by the given [=custom highlight name=].
       The <<custom-ident>> argument is required.
       See [[CSS-HIGHLIGHT-API-1]] for details.
-      <wpt>
-      css/css-highlight-api/painting/custom-highlight-painting-001.html
-      css/css-highlight-api/painting/custom-highlight-painting-002.html
-      css/css-highlight-api/painting/custom-highlight-painting-003.html
-      css/css-highlight-api/painting/custom-highlight-painting-004.html
-      css/css-highlight-api/painting/custom-highlight-painting-005.html
-      css/css-highlight-api/painting/custom-highlight-painting-006.html
-      css/css-highlight-api/painting/custom-highlight-painting-007.html
-      css/css-highlight-api/painting/custom-highlight-painting-008.html
-      css/css-highlight-api/painting/custom-highlight-painting-009.html
-      css/css-highlight-api/painting/custom-highlight-painting-010.html
-      css/css-highlight-api/painting/custom-highlight-painting-011.html
-      css/css-highlight-api/painting/custom-highlight-painting-012.html
-      css/css-highlight-api/painting/custom-highlight-painting-013.html
-      css/css-highlight-api/painting/custom-highlight-painting-014.html
-      css/css-highlight-api/painting/custom-highlight-painting-015.html
-      css/css-highlight-api/painting/custom-highlight-painting-iframe-001.html
-      css/css-highlight-api/painting/custom-highlight-painting-iframe-002.html
-      css/css-highlight-api/painting/custom-highlight-painting-iframe-003.html
-      css/css-highlight-api/painting/custom-highlight-painting-iframe-004.html
-      css/css-highlight-api/painting/custom-highlight-painting-iframe-005.html
-      css/css-highlight-api/painting/custom-highlight-painting-iframe-006.html
-      css/css-highlight-api/painting/custom-highlight-painting-invalidation-001.html
-      css/css-highlight-api/painting/custom-highlight-painting-invalidation-002.html
-      css/css-highlight-api/painting/custom-highlight-painting-invalidation-003.html
-      css/css-highlight-api/painting/custom-highlight-painting-invalidation-004.html
-      css/css-highlight-api/painting/custom-highlight-painting-invalidation-005.html
-      css/css-highlight-api/painting/custom-highlight-painting-invalidation-006.html
-      css/css-highlight-api/painting/custom-highlight-painting-invalidation-007.html
-      css/css-highlight-api/painting/custom-highlight-painting-prioritization-001.html
-      css/css-highlight-api/painting/custom-highlight-painting-prioritization-002.html
-      css/css-highlight-api/painting/custom-highlight-painting-staticrange-001.html
-      css/css-highlight-api/painting/custom-highlight-painting-staticrange-002.html
-      css/css-highlight-api/painting/custom-highlight-painting-staticrange-003.html
-      css/css-highlight-api/painting/custom-highlight-painting-staticrange-004.html
-      css/css-highlight-api/painting/custom-highlight-painting-staticrange-005.html
-      css/css-highlight-api/painting/custom-highlight-painting-staticrange-006.html
-      css/css-highlight-api/painting/custom-highlight-painting-staticrange-007.html
-      </wpt>
   </dl>
 
   The <a>highlight pseudo-elements</a>
@@ -926,7 +898,6 @@ Styling Highlights</h3>
   applied to the text
   by the <a>originating element</a> and its ancestors and descendants.
 
-
   For any properties not listed above,
   but which are required to resolve the values of applicable properties,
   their [=computed values=] are copied from those of the [=originating element=],
@@ -935,13 +906,11 @@ Styling Highlights</h3>
 
   <ul>
     <li>'forced-color-adjust' (used in [=forced colors mode=] to resolve colors)
-      and 'color-scheme' (used to resolve [=system colors=])
+      and 'color-scheme' (used to resolve <<system-color>> values)
     <li>'font-size', 'font-family', etc. (used to resolve ''em'' and other [=font-relative lengths=]).
     <li>'line-height' (used to resolve ''lh'' units)
     <li>[=custom properties=] [[!CSS-VARIABLES-1]] (used in ''var()'' substitutions)
   </ul>
-
-  ISSUE(11011): Should 'color-scheme' go here, or in the list of applicable properties?
 
 <!-- Add this back if for some reason someone wants to implement 'outline'?
   The outline, if supported, must be drawn
@@ -1551,7 +1520,7 @@ List Markers: the ''::marker'' pseudo-element</h3>
   and the computed value of 'display' on ''::marker''
   always loses any ''display/list-item'' aspect.
 
-  ISSUE: Should ''::marker'' also have ''::prefix'' and ''::postfix'' sub-elements?
+  ISSUE: Should ''::marker'' also have ''::prefix'' and ''::suffix'' sub-elements?
 
 <h3 id="placeholder-pseudo">
 Placeholder Input: the ''::placeholder'' pseudo-element</h3>
@@ -1656,7 +1625,6 @@ File Selector Button: the ''::file-selector-button'' pseudo-element</h3>
   targets the ''&lt;button>''
   inside an ''&lt;input>'' element with <code>type=file</code>,
   if the UA renders such a button.
-  It is an [=element-backed pseudo-element=].
 
   <wpt>
     file-selector-button-001.html
@@ -1917,11 +1885,18 @@ Changes</h2>
        <a href="https://github.com/w3c/csswg-drafts/issues/11317">11317</a>)
     <li>Defined ''::highlight()'' and improved cross-referencing to [[CSS-HIGHLIGHT-API-1]].
       (Issue <a href="https://github.com/w3c/csswg-drafts/issues/6755">6755</a>)
-    <li>Added ''::search-text'' as a new [=highlight pseudo-element=].
+    <li>Added ''::search-text'' as a new [=highlight pseudo-element=],
+      and allowed it to combine with '':current''.
       (Issues <a href="https://github.com/w3c/csswg-drafts/issues/10212">10212</a>
-       and <a href="https://github.com/w3c/csswg-drafts/issues/10213">10213</a>)
+       <a href="https://github.com/w3c/csswg-drafts/issues/10213">10213</a>,
+       and <a href="https://github.com/w3c/csswg-drafts/issues/10298">10298</a>)
     <li>Added ''::details-content'' pseudo-element
       (<a href="https://github.com/w3c/csswg-drafts/pull/10379">Issue 10379</a>)
+    <li>Allow space and no-break space to be part of ''::first-letter''
+      when occuring before the [=first letter=].
+      (<a href="https://github.com/w3c/csswg-drafts/issues/9413">Issue 9413</a>)
+    <li>Renamed ''::postfix'' to ''::suffix''.
+      (Issue <a href="https://github.com/w3c/csswg-drafts/issues/11949">Issue 11949</a>)
     <li>Excluded inline layout properties from ''::placeholder''.
       (<a href="https://github.com/w3c/csswg-drafts/issues/5379">Issue 5379</a>)
     <li>Clarified that UAs must not tweak author-specified colors for [=highlight pseudo-elements=].

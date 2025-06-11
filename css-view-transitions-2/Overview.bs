@@ -652,7 +652,7 @@ div.box {
 
 	The 'view-transition-class' can be used to apply the same style rule to multiple [=named view transition pseudo-elements=] which may have a different 'view-transition-name'.
 	While 'view-transition-name' is used to match between the element in the old state with its corresponding element in the new state, 'view-transition-class' is used
-	only to apply styles using the view transitionpseudo-elements
+	only to apply styles using the view transition pseudo-elements
 	(''::view-transition-group()'', ''::view-transition-image-pair()'', ''::view-transition-old()'', ''::view-transition-new()'').
 
 	Note that 'view-transition-class' by itself doesn't mark an element for capturing, it is only used as an additional
@@ -785,19 +785,26 @@ Ordinarily, each of these items would have to receive a unique 'view-transition-
 
 ```css
 li:nth-child(1) { view-transition-name: item1; }
-li:nth-child(2) { view-transition-name: item1; }
-li:nth-child(3) { view-transition-name: item1; }
-li:nth-child(4) { view-transition-name: item1; }
+li:nth-child(2) { view-transition-name: item2; }
+li:nth-child(3) { view-transition-name: item3; }
+li:nth-child(4) { view-transition-name: item4; }
 ...
 ```
 
-With ''view-transition-name/auto'', this CSS would work:
+With ''view-transition-name/auto'' or ''view-transition-name/match-element'', this CSS would work:
 
 ```css
 li {
 	view-transition-name: auto;
+	/* or */
+	view-transition-name: match-element;
 }
 ```
+
+The ''view-transition-name/auto'' and ''view-transition-name/match-element'' keywords have a minor
+difference, where ''view-transition-name/auto'' would use the element's [=Element/id=] as the 'view-transition-name'
+if it exists, making it potentially work across documents, while ''view-transition-name/match-element'' only matches
+based on element identity.
 </div>
 
 ## Additions to 'view-transition-name' ## {#additions-to-vt-name}
@@ -807,14 +814,13 @@ To resolve the [=used value=] of 'view-transition-name' for |element|:
 	1. Let |computed| be the [=computed value=] of 'view-transition-name'.
 	1. If |computed| is <css>none</css>, return null.
 	1. If |computed| is a <<custom-ident>>, return |computed|.
-	1. Assert: |computed| is <css>auto</css>.
-	1. If |element| has an associated [=Element/id=], and |computed| is associated with the same [=tree/root=] as |element|'s [=tree/root=], then return the value of |element|'s [=Element/id=].
+	1. Assert: |computed| is <css>auto</css> or <css>match-element</css>.
+	1. If |computed| is <css>auto</css>, |element| has an associated [=Element/id=], and |computed| is associated with the same [=tree/root=] as |element|'s [=tree/root=], then return a unique string starting with "<code>-ua-</code>".
+		Two elements with the same [=Element/id=] must return the same string, regardless of their [=node document=].
 
 		Note: this means that a ''::part()'' pseudo-element wouldn't resolve to its matching element's [=Element/id=].
 
-	1. Return a unique string. The string should remain consistent and unique for this element and {{Document}}, at least for the lifetime of |element|'s [=node document=]'s [=active view transition=].
-
-		Note: this string is not web-observable, and is used for addressing the element in internal algorithms.
+	1. Return a unique string starting with "<code>-ua-</code>". The string should remain consistent and unique for this element and {{Document}}, at least for the lifetime of |element|'s [=node document=]'s [=active view transition=].
 
 		Note: When used in a cross-document view transition, generated <css>auto</css> values never match, resulting in separate ''::view-transition-group()'' pseudo-elements, one exiting and one entering.
 
